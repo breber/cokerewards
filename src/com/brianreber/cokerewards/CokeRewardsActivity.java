@@ -7,9 +7,7 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -37,21 +35,61 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+/**
+ * Login/Main activity for the app
+ * 
+ * @author breber
+ */
 public class CokeRewardsActivity extends Activity {
+	/**
+	 * SharedPreference name
+	 */
 	public static final String COKE_REWARDS = "CokeRewards";
 
+	/**
+	 * Email address preference key
+	 */
 	public static final String EMAIL_ADDRESS = "emailAddress";
+
+	/**
+	 * Password preference key
+	 */
 	public static final String PASSWORD = "password";
+
+	/**
+	 * Logged in state preference key
+	 */
 	public static final String LOGGED_IN = "loggedIn";
+
+	/**
+	 * Point count preference key
+	 */
 	public static final String POINTS = "points";
+
+	/**
+	 * Screen name preference key
+	 */
 	public static final String SCREEN_NAME = "screenName";
 
+	/**
+	 * URL to POST requests to
+	 */
 	private static final String URL = "https://secure.mycokerewards.com/xmlrpc";
 
+	/**
+	 * Handler to use for the threads
+	 */
 	private Handler handler = new Handler();
 
+	/**
+	 * The request response
+	 */
 	private String mResult;
 
+	/**
+	 * A Runnable that will update the UI with values stored
+	 * in SharedPreferences
+	 */
 	private Runnable updateUIRunnable = new Runnable() {
 		@Override
 		public void run() {
@@ -75,7 +113,9 @@ public class CokeRewardsActivity extends Activity {
 	};
 
 
-	/** Called when the activity is first created. */
+	/**
+	 * Set up the basic UI elements
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -116,6 +156,9 @@ public class CokeRewardsActivity extends Activity {
 		}
 	}
 
+	/**
+	 * Get the number of points from the MyCokeRewards server
+	 */
 	private void getNumberOfPoints() {
 		new Thread(new Runnable() {
 			@Override
@@ -129,15 +172,30 @@ public class CokeRewardsActivity extends Activity {
 		}).start();
 	}
 
+	/**
+	 * Do we have a logged in user?
+	 * 
+	 * @return whether we have a valid email address, password, and have successfully
+	 * logged in with the most recent request
+	 */
 	private boolean isLoggedIn() {
 		SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
 		return prefs.contains(EMAIL_ADDRESS) && prefs.contains(PASSWORD) && prefs.contains(LOGGED_IN);
 	}
 
+	/**
+	 * Make a server request and update preferences accordingly.
+	 * 
+	 * @param postValue The value to POST to the server
+	 * @param mRunnable The Runnable to start after we are done processing
+	 * @throws IOException
+	 * @throws XPathExpressionException
+	 * @throws SAXException
+	 * @throws ParserConfigurationException
+	 */
 	private void getData(String postValue, Runnable mRunnable) throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
 		java.net.URL url = new java.net.URL(URL);
 		HttpsURLConnection https = (HttpsURLConnection) url.openConnection();
-		https.setHostnameVerifier(DO_NOT_VERIFY);
 		https.setDoOutput(true);
 		https.setDoInput(true);
 
@@ -214,12 +272,4 @@ public class CokeRewardsActivity extends Activity {
 			} catch (IOException ignored) {	}
 		}
 	}
-
-
-	final static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
-		@Override
-		public boolean verify(String hostname, SSLSession session) {
-			return true;
-		}
-	};
 }

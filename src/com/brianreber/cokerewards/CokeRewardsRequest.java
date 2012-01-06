@@ -8,8 +8,20 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Xml;
 
+/**
+ * Build requests that should be sent in POST requests
+ * to the MyCokeRewards website.
+ * 
+ * @author breber
+ */
 public class CokeRewardsRequest {
 
+	/**
+	 * Create a basic retrieve points balance request
+	 * 
+	 * @param ctx with which we can retrieve preferences
+	 * @return a POST body
+	 */
 	public static String createLoginRequestBody(Context ctx) {
 		SharedPreferences prefs = ctx.getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, Context.MODE_WORLD_READABLE);
 
@@ -89,6 +101,12 @@ public class CokeRewardsRequest {
 		}
 	}
 
+	/**
+	 * Create a request to send a new code to the server
+	 * 
+	 * @param ctx with which we can retrieve preferences
+	 * @return a POST body
+	 */
 	public static String createCodeRequestBody(Context ctx, String code) {
 		SharedPreferences prefs = ctx.getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, Context.MODE_WORLD_READABLE);
 
