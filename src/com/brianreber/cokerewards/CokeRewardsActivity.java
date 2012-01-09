@@ -3,11 +3,9 @@ package com.brianreber.cokerewards;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 
-import javax.net.ssl.HttpsURLConnection;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -16,6 +14,11 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -74,7 +77,7 @@ public class CokeRewardsActivity extends Activity {
 	/**
 	 * URL to POST requests to
 	 */
-	private static final String URL = "https://secure.mycokerewards.com/xmlrpc";
+	private static final String URL = "http://www.mycokerewards.com/xmlrpc";
 
 	/**
 	 * Handler to use for the threads
@@ -133,8 +136,15 @@ public class CokeRewardsActivity extends Activity {
 						@Override
 						public void run() {
 							try {
-								String code = ((EditText) findViewById(R.id.code)).getText().toString();
+								EditText tv = (EditText) findViewById(R.id.code);
+								String code = tv.getText().toString();
+
+								code = code.replace(" ", "");
+								code = code.toUpperCase();
 								getData(CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, code), updateUIRunnable);
+
+								tv.setText("");
+								getNumberOfPoints();
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
@@ -194,19 +204,16 @@ public class CokeRewardsActivity extends Activity {
 	 * @throws ParserConfigurationException
 	 */
 	private void getData(String postValue, Runnable mRunnable) throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
-		java.net.URL url = new java.net.URL(URL);
-		HttpsURLConnection https = (HttpsURLConnection) url.openConnection();
-		https.setDoOutput(true);
-		https.setDoInput(true);
+		HttpClient httpclient = new DefaultHttpClient();
+		HttpPost httppost = new HttpPost(URL);
 
-		https.setRequestMethod("POST");
-		https.setRequestProperty("Content-Length", postValue.getBytes().length + "");
+		StringEntity se = new StringEntity(postValue);
+		se.setContentType("text/xml");
+		httppost.setEntity(se);
 
-		OutputStream output = https.getOutputStream();
-		output.write(postValue.getBytes());
-		output.close();
+		HttpResponse response = httpclient.execute(httppost);
 
-		InputStream input = https.getInputStream();
+		InputStream input = response.getEntity().getContent();
 
 		mResult = readStreamAsString(input);
 
@@ -216,7 +223,7 @@ public class CokeRewardsActivity extends Activity {
 		Document document = builder.parse(new InputSource(new StringReader(mResult)));
 		XPath xpath = XPathFactory.newInstance().newXPath();
 
-		SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
+		SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_WRITEABLE);
 		Editor edit = prefs.edit();
 
 		NodeList nodes = (NodeList) xpath.evaluate("/methodResponse//member/value[../name/text()='POINTS']", document, XPathConstants.NODESET);
