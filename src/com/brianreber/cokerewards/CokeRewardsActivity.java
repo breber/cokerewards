@@ -27,6 +27,7 @@ import org.xml.sax.SAXException;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
@@ -82,12 +83,12 @@ public class CokeRewardsActivity extends Activity {
 	/**
 	 * Handler to use for the threads
 	 */
-	private Handler handler = new Handler();
+	private static Handler handler = new Handler();
 
 	/**
 	 * The request response
 	 */
-	private String mResult;
+	private static String mResult;
 
 	/**
 	 * A Runnable that will update the UI with values stored
@@ -99,13 +100,6 @@ public class CokeRewardsActivity extends Activity {
 			SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
 
 			TextView tv = (TextView) findViewById(R.id.numPoints);
-
-			if (isLoggedIn() && tv == null) {
-				setContentView(R.layout.main);
-				tv = (TextView) findViewById(R.id.numPoints);
-			}
-
-
 			tv.setText("Number of Points: " + prefs.getString(POINTS, ""));
 
 			tv = (TextView) findViewById(R.id.screenName);
@@ -122,10 +116,9 @@ public class CokeRewardsActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setContentView(R.layout.main);
 
 		if (isLoggedIn()) {
-			setContentView(R.layout.main);
-
 			getNumberOfPoints();
 
 			Button submitCode = (Button) findViewById(R.id.submitCode);
@@ -141,7 +134,7 @@ public class CokeRewardsActivity extends Activity {
 
 								code = code.replace(" ", "");
 								code = code.toUpperCase();
-								getData(CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, code), updateUIRunnable);
+								getData(CokeRewardsActivity.this, CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, code), updateUIRunnable);
 
 								tv.setText("");
 								getNumberOfPoints();
@@ -154,16 +147,16 @@ public class CokeRewardsActivity extends Activity {
 			});
 
 		} else {
-			setContentView(R.layout.login);
-
-			Button login = (Button) findViewById(R.id.performLogin);
-			login.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					getNumberOfPoints();
-				}
-			});
+			Intent register = new Intent(this, RegisterActivity.class);
+			startActivity(register);
 		}
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		getNumberOfPoints();
 	}
 
 	/**
@@ -174,7 +167,7 @@ public class CokeRewardsActivity extends Activity {
 			@Override
 			public void run() {
 				try {
-					getData(CokeRewardsRequest.createLoginRequestBody(CokeRewardsActivity.this), updateUIRunnable);
+					getData(CokeRewardsActivity.this, CokeRewardsRequest.createLoginRequestBody(CokeRewardsActivity.this), updateUIRunnable);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -189,7 +182,17 @@ public class CokeRewardsActivity extends Activity {
 	 * logged in with the most recent request
 	 */
 	private boolean isLoggedIn() {
-		SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
+		return isLoggedIn(this);
+	}
+
+	/**
+	 * Do we have a logged in user?
+	 * 
+	 * @return whether we have a valid email address, password, and have successfully
+	 * logged in with the most recent request
+	 */
+	public static boolean isLoggedIn(Context ctx) {
+		SharedPreferences prefs = ctx.getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
 		return prefs.contains(EMAIL_ADDRESS) && prefs.contains(PASSWORD) && prefs.contains(LOGGED_IN);
 	}
 
@@ -203,13 +206,15 @@ public class CokeRewardsActivity extends Activity {
 	 * @throws SAXException
 	 * @throws ParserConfigurationException
 	 */
-	private void getData(String postValue, Runnable mRunnable) throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
+	public static void getData(Context ctx, String postValue, Runnable mRunnable) throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpPost httppost = new HttpPost(URL);
 
 		StringEntity se = new StringEntity(postValue);
 		se.setContentType("text/xml");
 		httppost.setEntity(se);
+
+		Log.d("POSTVAL", "Post: " + postValue);
 
 		HttpResponse response = httpclient.execute(httppost);
 
@@ -223,7 +228,7 @@ public class CokeRewardsActivity extends Activity {
 		Document document = builder.parse(new InputSource(new StringReader(mResult)));
 		XPath xpath = XPathFactory.newInstance().newXPath();
 
-		SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_WRITEABLE);
+		SharedPreferences prefs = ctx.getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_WRITEABLE);
 		Editor edit = prefs.edit();
 
 		NodeList nodes = (NodeList) xpath.evaluate("/methodResponse//member/value[../name/text()='POINTS']", document, XPathConstants.NODESET);
