@@ -37,7 +37,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.google.ads.AdRequest;
+import com.google.ads.AdSize;
+import com.google.ads.AdView;
 
 /**
  * Login/Main activity for the app
@@ -89,6 +94,8 @@ public class CokeRewardsActivity extends Activity {
 	 * The request response
 	 */
 	private static String mResult;
+
+	private AdView adView;
 
 	/**
 	 * A Runnable that will update the UI with values stored
@@ -157,10 +164,29 @@ public class CokeRewardsActivity extends Activity {
 				}
 			});
 
+
+			// Create the adView
+			adView = new AdView(this, AdSize.BANNER, "a14f11d378bdbae");
+
+			// Lookup your LinearLayout assuming it’s been given
+			// the attribute android:id="@+id/mainLayout"
+			LinearLayout layout = (LinearLayout)findViewById(R.id.adLayout);
+
+			// Add the adView to it
+			layout.addView(adView);
+
+			// Initiate a generic request to load it with an ad
+			adView.loadAd(new AdRequest());
 		} else {
 			Intent register = new Intent(this, RegisterActivity.class);
 			startActivity(register);
 		}
+	}
+
+	@Override
+	public void onDestroy() {
+		adView.destroy();
+		super.onDestroy();
 	}
 
 	@Override
