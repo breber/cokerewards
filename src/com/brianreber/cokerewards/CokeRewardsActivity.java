@@ -109,6 +109,17 @@ public class CokeRewardsActivity extends Activity {
 		}
 	};
 
+	/**
+	 * A Runnable that will update the UI with values stored
+	 * in SharedPreferences
+	 */
+	private Runnable codeUpdateRunnable = new Runnable() {
+		@Override
+		public void run() {
+			getNumberOfPoints();
+		}
+	};
+
 
 	/**
 	 * Set up the basic UI elements
@@ -134,7 +145,7 @@ public class CokeRewardsActivity extends Activity {
 
 								code = code.replace(" ", "");
 								code = code.toUpperCase();
-								getData(CokeRewardsActivity.this, CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, code), updateUIRunnable);
+								getData(CokeRewardsActivity.this, CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, code), codeUpdateRunnable);
 
 								tv.setText("");
 								getNumberOfPoints();
