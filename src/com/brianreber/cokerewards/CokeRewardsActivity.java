@@ -105,6 +105,9 @@ public class CokeRewardsActivity extends Activity {
 	 */
 	private static String mResult;
 
+	/**
+	 * The view where ads with display
+	 */
 	private AdView adView;
 
 	/**
@@ -120,9 +123,10 @@ public class CokeRewardsActivity extends Activity {
 			tv.setText("Number of Points: " + prefs.getString(POINTS, ""));
 
 			tv = (TextView) findViewById(R.id.screenName);
-			String name = "".equals(prefs.getString(SCREEN_NAME, "")) ?
-					prefs.getString(EMAIL_ADDRESS, "") : prefs.getString(SCREEN_NAME, "");
-					tv.setText("Welcome " + name + "!");
+			String name = ("".equals(prefs.getString(SCREEN_NAME, "")) ?
+					prefs.getString(EMAIL_ADDRESS, "") : prefs.getString(SCREEN_NAME, ""));
+
+			tv.setText("Welcome " + name + "!");
 		}
 	};
 
