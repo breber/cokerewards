@@ -32,13 +32,13 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.ads.AdRequest;
 import com.google.ads.AdSize;
@@ -79,6 +79,16 @@ public class CokeRewardsActivity extends Activity {
 	 * Screen name preference key
 	 */
 	public static final String SCREEN_NAME = "screenName";
+
+	/**
+	 * Result of latest code entry
+	 */
+	public static final String ENTER_CODE_RESULT = "enterCodeResult";
+
+	/**
+	 * Result of messages
+	 */
+	public static final String MESSAGES = "messagesResult";
 
 	/**
 	 * URL to POST requests to
@@ -123,6 +133,16 @@ public class CokeRewardsActivity extends Activity {
 	private Runnable codeUpdateRunnable = new Runnable() {
 		@Override
 		public void run() {
+			SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
+
+			if (prefs.getBoolean(ENTER_CODE_RESULT, false)) {
+				EditText tv = (EditText) findViewById(R.id.code);
+				tv.setText("");
+			} else {
+				String messages = prefs.getString(MESSAGES, "");
+				Toast.makeText(getApplicationContext(), "Code submission failed..." + messages, Toast.LENGTH_SHORT).show();
+			}
+
 			getNumberOfPoints();
 		}
 	};
@@ -166,9 +186,6 @@ public class CokeRewardsActivity extends Activity {
 								code = code.replace(" ", "");
 								code = code.toUpperCase();
 								getData(CokeRewardsActivity.this, CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, code), codeUpdateRunnable);
-
-								tv.setText("");
-								getNumberOfPoints();
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
@@ -230,7 +247,7 @@ public class CokeRewardsActivity extends Activity {
 	 */
 	public static boolean isLoggedIn(Context ctx) {
 		SharedPreferences prefs = ctx.getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
-		return prefs.contains(EMAIL_ADDRESS) && prefs.contains(PASSWORD) && prefs.contains(LOGGED_IN);
+		return prefs.contains(EMAIL_ADDRESS) && prefs.contains(PASSWORD) && prefs.getBoolean(LOGGED_IN, false);
 	}
 
 	/**
@@ -251,7 +268,7 @@ public class CokeRewardsActivity extends Activity {
 		se.setContentType("text/xml");
 		httppost.setEntity(se);
 
-		Log.d("POSTVAL", "Post: " + postValue);
+		//		Log.d("POSTVAL", "Post: " + postValue);
 
 		HttpResponse response = httpclient.execute(httppost);
 
@@ -289,11 +306,25 @@ public class CokeRewardsActivity extends Activity {
 			edit.putString(SCREEN_NAME, n.getTextContent());
 		}
 
+		nodes = (NodeList) xpath.evaluate("/methodResponse//member/value[../name/text()='ENTER_CODE_RESULT']", document, XPathConstants.NODESET);
+
+		for (int i = 0; i < nodes.getLength(); i++) {
+			Node n = nodes.item(i);
+			edit.putBoolean(ENTER_CODE_RESULT, Boolean.parseBoolean(n.getTextContent()));
+		}
+
+		nodes = (NodeList) xpath.evaluate("/methodResponse//member/value[../name/text()='MESSAGES']", document, XPathConstants.NODESET);
+
+		for (int i = 0; i < nodes.getLength(); i++) {
+			Node n = nodes.item(i);
+			edit.putString(MESSAGES, n.getTextContent());
+		}
+
 		edit.commit();
 
 		handler.post(mRunnable);
 
-		Log.d("RESULT", "Result: " + mResult);
+		//		Log.d("RESULT", "Result: " + mResult);
 	}
 
 	/**
