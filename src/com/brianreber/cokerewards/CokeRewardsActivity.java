@@ -136,6 +136,19 @@ public class CokeRewardsActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
+		// Create the adView
+		adView = new AdView(this, AdSize.BANNER, "a14f11d378bdbae");
+
+		// Lookup your LinearLayout assuming it’s been given
+		// the attribute android:id="@+id/mainLayout"
+		LinearLayout layout = (LinearLayout) findViewById(R.id.adLayout);
+
+		// Add the adView to it
+		layout.addView(adView);
+
+		// Initiate a generic request to load it with an ad
+		adView.loadAd(new AdRequest());
+
 		if (isLoggedIn()) {
 			getNumberOfPoints();
 
@@ -164,19 +177,6 @@ public class CokeRewardsActivity extends Activity {
 				}
 			});
 
-
-			// Create the adView
-			adView = new AdView(this, AdSize.BANNER, "a14f11d378bdbae");
-
-			// Lookup your LinearLayout assuming it’s been given
-			// the attribute android:id="@+id/mainLayout"
-			LinearLayout layout = (LinearLayout)findViewById(R.id.adLayout);
-
-			// Add the adView to it
-			layout.addView(adView);
-
-			// Initiate a generic request to load it with an ad
-			adView.loadAd(new AdRequest());
 		} else {
 			Intent register = new Intent(this, RegisterActivity.class);
 			startActivity(register);
