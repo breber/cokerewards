@@ -2,7 +2,7 @@
 <resources>
 
     <string name="submit">Submit</string>
-    <string name="app_name">CokeRewards</string>
+    <string name="app_name">Coke Rewards</string>
     <string name="username">Username: </string>
     <string name="password">Password: </string>
 

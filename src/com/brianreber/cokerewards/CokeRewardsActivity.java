@@ -142,6 +142,8 @@ public class CokeRewardsActivity extends Activity {
 			if (prefs.getBoolean(ENTER_CODE_RESULT, false)) {
 				EditText tv = (EditText) findViewById(R.id.code);
 				tv.setText("");
+
+				Toast.makeText(getApplicationContext(), "Code submitted successfully", Toast.LENGTH_SHORT).show();
 			} else {
 				String messages = prefs.getString(MESSAGES, "");
 				Toast.makeText(getApplicationContext(), "Code submission failed..." + messages, Toast.LENGTH_SHORT).show();
