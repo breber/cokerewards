@@ -43,6 +43,7 @@ import android.widget.Toast;
 import com.google.ads.AdRequest;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 /**
  * Login/Main activity for the app
@@ -111,6 +112,11 @@ public class CokeRewardsActivity extends Activity {
 	private AdView adView;
 
 	/**
+	 * Google Analytics tracker
+	 */
+	private GoogleAnalyticsTracker tracker;
+
+	/**
 	 * A Runnable that will update the UI with values stored
 	 * in SharedPreferences
 	 */
@@ -144,9 +150,12 @@ public class CokeRewardsActivity extends Activity {
 				tv.setText("");
 
 				Toast.makeText(getApplicationContext(), "Code submitted successfully", Toast.LENGTH_SHORT).show();
+				tracker.trackEvent("SuccessfulCode", "SuccessfulCode", "SuccessfulCodeSubmission", 0);
 			} else {
 				String messages = prefs.getString(MESSAGES, "");
 				Toast.makeText(getApplicationContext(), "Code submission failed..." + messages, Toast.LENGTH_SHORT).show();
+
+				tracker.trackEvent("FailedCode", "FailedCode", "Code submission failed: " + messages, 0);
 			}
 
 			getNumberOfPoints();
@@ -175,31 +184,40 @@ public class CokeRewardsActivity extends Activity {
 		// Initiate a generic request to load it with an ad
 		adView.loadAd(new AdRequest());
 
+		tracker = GoogleAnalyticsTracker.getInstance();
+
+		// Start the tracker in manual dispatch mode...
+		tracker.startNewSession("UA-3673402-16", 20, this);
+		tracker.setAnonymizeIp(true);
+
+		Button submitCode = (Button) findViewById(R.id.submitCode);
+		submitCode.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							EditText tv = (EditText) findViewById(R.id.code);
+							String code = tv.getText().toString();
+
+							code = code.replace(" ", "");
+							code = code.toUpperCase();
+
+							tracker.trackEvent("Button", "SubmitCode", "Submit Code button clicked", 0);
+
+							getData(CokeRewardsActivity.this, CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, code), codeUpdateRunnable);
+						} catch (Exception e) {
+							tracker.trackEvent("Exception", "ExceptionSubmitCode", "Submit Code encountered an exception: " + e.getMessage(), 0);
+							e.printStackTrace();
+						}
+					}
+				}).start();
+			}
+		});
+
 		if (isLoggedIn()) {
 			getNumberOfPoints();
-
-			Button submitCode = (Button) findViewById(R.id.submitCode);
-			submitCode.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					new Thread(new Runnable() {
-						@Override
-						public void run() {
-							try {
-								EditText tv = (EditText) findViewById(R.id.code);
-								String code = tv.getText().toString();
-
-								code = code.replace(" ", "");
-								code = code.toUpperCase();
-								getData(CokeRewardsActivity.this, CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, code), codeUpdateRunnable);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-					}).start();
-				}
-			});
-
 		} else {
 			Intent register = new Intent(this, RegisterActivity.class);
 			startActivity(register);
@@ -209,6 +227,10 @@ public class CokeRewardsActivity extends Activity {
 	@Override
 	public void onDestroy() {
 		adView.destroy();
+
+		// Stop the tracker when it is no longer needed.
+		tracker.stopSession();
+
 		super.onDestroy();
 	}
 
@@ -227,8 +249,10 @@ public class CokeRewardsActivity extends Activity {
 			@Override
 			public void run() {
 				try {
+					tracker.trackEvent("CountFetch", "CountFetch", "Fetched number of points", 0);
 					getData(CokeRewardsActivity.this, CokeRewardsRequest.createLoginRequestBody(CokeRewardsActivity.this), updateUIRunnable);
 				} catch (Exception e) {
+					tracker.trackEvent("Exception", "ExceptionGetNumPoints", "Get number of points encountered an exception: " + e.getMessage(), 0);
 					e.printStackTrace();
 				}
 			}

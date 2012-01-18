@@ -10,12 +10,19 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+
 /**
  * Login/Main activity for the app
  * 
  * @author breber
  */
 public class RegisterActivity extends Activity {
+
+	/**
+	 * Google Analytics tracker
+	 */
+	private GoogleAnalyticsTracker tracker;
 
 	/**
 	 * A Runnable that will update the UI with values stored
@@ -39,6 +46,8 @@ public class RegisterActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		setContentView(R.layout.login);
+
+		tracker = GoogleAnalyticsTracker.getInstance();
 
 		Button login = (Button) findViewById(R.id.performLogin);
 		login.setOnClickListener(new OnClickListener() {
@@ -70,10 +79,13 @@ public class RegisterActivity extends Activity {
 			@Override
 			public void run() {
 				try {
+					tracker.trackEvent("Logon", "Logon", "Logging on", 0);
+
 					CokeRewardsActivity.getData(RegisterActivity.this,
 							CokeRewardsRequest.createLoginRequestBody(RegisterActivity.this),
 							updateUIRunnable);
 				} catch (Exception e) {
+					tracker.trackEvent("Exception", "ExceptionLogon", "Exception when trying to log on: " + e.getMessage(), 0);
 					e.printStackTrace();
 				}
 			}
