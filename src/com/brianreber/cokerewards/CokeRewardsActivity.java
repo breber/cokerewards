@@ -97,6 +97,11 @@ public class CokeRewardsActivity extends Activity {
 	private static final String URL = "http://www.mycokerewards.com/xmlrpc";
 
 	/**
+	 * Request code for starting our RegisterActivity
+	 */
+	private static final int REGISTER_REQUEST_CODE = 1000;
+
+	/**
 	 * Handler to use for the threads
 	 */
 	private static Handler handler = new Handler();
@@ -194,19 +199,24 @@ public class CokeRewardsActivity extends Activity {
 		submitCode.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				EditText tv = (EditText) findViewById(R.id.code);
+				String code = tv.getText().toString();
+
+				code = code.replace(" ", "");
+				final String finalCode = code.toUpperCase();
+
+				if (finalCode.length() < 10) {
+					Toast.makeText(CokeRewardsActivity.this, "Code not long enough", Toast.LENGTH_SHORT).show();
+					return;
+				}
+
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
 						try {
-							EditText tv = (EditText) findViewById(R.id.code);
-							String code = tv.getText().toString();
-
-							code = code.replace(" ", "");
-							code = code.toUpperCase();
-
 							tracker.trackEvent("Button", "SubmitCode", "Submit Code button clicked", 0);
 
-							getData(CokeRewardsActivity.this, CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, code), codeUpdateRunnable);
+							getData(CokeRewardsActivity.this, CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, finalCode), codeUpdateRunnable);
 						} catch (Exception e) {
 							tracker.trackEvent("Exception", "ExceptionSubmitCode", "Submit Code encountered an exception: " + e.getMessage(), 0);
 							e.printStackTrace();
@@ -220,7 +230,7 @@ public class CokeRewardsActivity extends Activity {
 			getNumberOfPoints();
 		} else {
 			Intent register = new Intent(this, RegisterActivity.class);
-			startActivity(register);
+			startActivityForResult(register, REGISTER_REQUEST_CODE);
 		}
 	}
 
@@ -278,6 +288,18 @@ public class CokeRewardsActivity extends Activity {
 	public static boolean isLoggedIn(Context ctx) {
 		SharedPreferences prefs = ctx.getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
 		return prefs.contains(EMAIL_ADDRESS) && prefs.contains(PASSWORD) && prefs.getBoolean(LOGGED_IN, false);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		if (isLoggedIn()) {
+			getNumberOfPoints();
+		} else {
+			Intent register = new Intent(this, RegisterActivity.class);
+			startActivityForResult(register, REGISTER_REQUEST_CODE);
+		}
 	}
 
 	/**

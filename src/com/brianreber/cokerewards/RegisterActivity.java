@@ -9,11 +9,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 /**
- * Login/Main activity for the app
+ * Login activity for the app
  * 
  * @author breber
  */
@@ -67,6 +68,11 @@ public class RegisterActivity extends Activity {
 
 		txt = (EditText) findViewById(R.id.password);
 		final String password = txt.getText().toString();
+
+		if ("".equals(emailAddress) || "".equals(password)) {
+			Toast.makeText(this, "Username and password are required", Toast.LENGTH_SHORT).show();
+			return;
+		}
 
 		SharedPreferences prefs = getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, Context.MODE_WORLD_WRITEABLE);
 		Editor edit = prefs.edit();
