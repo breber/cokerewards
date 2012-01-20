@@ -167,6 +167,16 @@ public class CokeRewardsActivity extends Activity {
 		}
 	};
 
+	/**
+	 * A Runnable that will show an error Toast
+	 */
+	private Runnable errorRunnable = new Runnable() {
+		@Override
+		public void run() {
+			Toast.makeText(CokeRewardsActivity.this, "An error has occurred. Please try again.", Toast.LENGTH_SHORT).show();
+		}
+	};
+
 
 	/**
 	 * Set up the basic UI elements
@@ -219,6 +229,7 @@ public class CokeRewardsActivity extends Activity {
 							getData(CokeRewardsActivity.this, CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, finalCode), codeUpdateRunnable);
 						} catch (Exception e) {
 							tracker.trackEvent("Exception", "ExceptionSubmitCode", "Submit Code encountered an exception: " + e.getMessage(), 0);
+							handler.post(errorRunnable);
 							e.printStackTrace();
 						}
 					}
@@ -263,6 +274,7 @@ public class CokeRewardsActivity extends Activity {
 					getData(CokeRewardsActivity.this, CokeRewardsRequest.createLoginRequestBody(CokeRewardsActivity.this), updateUIRunnable);
 				} catch (Exception e) {
 					tracker.trackEvent("Exception", "ExceptionGetNumPoints", "Get number of points encountered an exception: " + e.getMessage(), 0);
+					handler.post(errorRunnable);
 					e.printStackTrace();
 				}
 			}
@@ -297,8 +309,7 @@ public class CokeRewardsActivity extends Activity {
 		if (isLoggedIn()) {
 			getNumberOfPoints();
 		} else {
-			Intent register = new Intent(this, RegisterActivity.class);
-			startActivityForResult(register, REGISTER_REQUEST_CODE);
+			finish();
 		}
 	}
 

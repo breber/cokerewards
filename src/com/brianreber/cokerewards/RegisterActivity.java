@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -26,15 +27,37 @@ public class RegisterActivity extends Activity {
 	private GoogleAnalyticsTracker tracker;
 
 	/**
-	 * A Runnable that will update the UI with values stored
-	 * in SharedPreferences
+	 * Handler for posting runnables between threads
+	 */
+	private Handler mHandler = new Handler();
+
+	/**
+	 * A Runnable that will close this activity if the user is
+	 * logged in properly
 	 */
 	private Runnable updateUIRunnable = new Runnable() {
 		@Override
 		public void run() {
 			if (CokeRewardsActivity.isLoggedIn(RegisterActivity.this)) {
 				RegisterActivity.this.finish();
+			} else {
+				SharedPreferences prefs = getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, Context.MODE_WORLD_WRITEABLE);
+				Editor edit = prefs.edit();
+
+				edit.remove(CokeRewardsActivity.EMAIL_ADDRESS);
+				edit.remove(CokeRewardsActivity.PASSWORD);
+				edit.commit();
 			}
+		}
+	};
+
+	/**
+	 * A Runnable that will show an error Toast
+	 */
+	private Runnable errorRunnable = new Runnable() {
+		@Override
+		public void run() {
+			Toast.makeText(RegisterActivity.this, "Error logging in. Please try again.", Toast.LENGTH_SHORT).show();
 		}
 	};
 
@@ -93,6 +116,8 @@ public class RegisterActivity extends Activity {
 				} catch (Exception e) {
 					tracker.trackEvent("Exception", "ExceptionLogon", "Exception when trying to log on: " + e.getMessage(), 0);
 					e.printStackTrace();
+
+					mHandler.post(errorRunnable);
 				}
 			}
 		}).start();
