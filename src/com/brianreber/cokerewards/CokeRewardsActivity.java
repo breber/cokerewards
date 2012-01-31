@@ -15,10 +15,21 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.params.ConnManagerPNames;
+import org.apache.http.conn.params.ConnPerRouteBean;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SingleClientConnManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpProtocolParams;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -261,6 +272,7 @@ public class CokeRewardsActivity extends Activity {
 								getData(CokeRewardsActivity.this, CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, finalCode), codeUpdateRunnable, true);
 							} catch (Exception e) {
 								tracker.trackEvent("Exception", "ExceptionSecureSubmitCode", "Submit Code encountered an exception: " + e.getMessage(), 0);
+								e.printStackTrace();
 								getData(CokeRewardsActivity.this, CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, finalCode), codeUpdateRunnable, false);
 							}
 						} catch (Exception e) {
@@ -311,6 +323,7 @@ public class CokeRewardsActivity extends Activity {
 						getData(CokeRewardsActivity.this, CokeRewardsRequest.createLoginRequestBody(CokeRewardsActivity.this), updateUIRunnable, true);
 					} catch (Exception e) {
 						tracker.trackEvent("Exception", "ExceptionSecureGetNumPoints", "Get number of points encountered an exception: " + e.getMessage(), 0);
+						e.printStackTrace();
 						getData(CokeRewardsActivity.this, CokeRewardsRequest.createLoginRequestBody(CokeRewardsActivity.this), updateUIRunnable, false);
 					}
 				} catch (Exception e) {
@@ -381,6 +394,23 @@ public class CokeRewardsActivity extends Activity {
 		}
 	}
 
+	private static HttpClient createHttpClient()
+	{
+		SchemeRegistry schemeRegistry = new SchemeRegistry();
+		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+		schemeRegistry.register(new Scheme("https", new EasySSLSocketFactory(), 443));
+		 
+		HttpParams params = new BasicHttpParams();
+		params.setParameter(ConnManagerPNames.MAX_TOTAL_CONNECTIONS, 30);
+		params.setParameter(ConnManagerPNames.MAX_CONNECTIONS_PER_ROUTE, new ConnPerRouteBean(30));
+		params.setParameter(HttpProtocolParams.USE_EXPECT_CONTINUE, false);
+		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
+		 
+		ClientConnectionManager cm = new SingleClientConnManager(params, schemeRegistry);
+		return new DefaultHttpClient(cm, params);
+	}
+
+	
 	/**
 	 * Make a server request and update preferences accordingly.
 	 * 
@@ -392,14 +422,14 @@ public class CokeRewardsActivity extends Activity {
 	 * @throws ParserConfigurationException
 	 */
 	public static void getData(Context ctx, String postValue, Runnable mRunnable, boolean isSecure) throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
-		HttpClient httpclient = new DefaultHttpClient();
+	    HttpClient httpClient = createHttpClient();//new DefaultHttpClient();
 		HttpPost httppost = new HttpPost(isSecure ? SECURE_URL : URL);
 
 		StringEntity se = new StringEntity(postValue);
 		se.setContentType("text/xml");
 		httppost.setEntity(se);
 
-		HttpResponse response = httpclient.execute(httppost);
+		HttpResponse response = httpClient.execute(httppost);
 
 		InputStream input = response.getEntity().getContent();
 
