@@ -55,6 +55,10 @@ public class RegisterActivity extends Activity {
 				edit.remove(CokeRewardsActivity.PASSWORD);
 				edit.commit();
 			}
+			
+			if (dlg != null && dlg.isShowing()) {
+				dlg.dismiss();
+			}
 		}
 	};
 
@@ -64,6 +68,10 @@ public class RegisterActivity extends Activity {
 	private Runnable errorRunnable = new Runnable() {
 		@Override
 		public void run() {
+			if (dlg != null && dlg.isShowing()) {
+				dlg.dismiss();
+			}
+			
 			Toast.makeText(RegisterActivity.this, "Error logging in. Please try again.", Toast.LENGTH_SHORT).show();
 		}
 	};

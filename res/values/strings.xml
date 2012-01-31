@@ -7,5 +7,6 @@
     <string name="password">Password: </string>
     <string name="loggingin">Logging on&#8230;</string>
     <string name="submitting">Submitting code&#8230;</string>
+    <string name="logout">Logout</string>
 
 </resources>

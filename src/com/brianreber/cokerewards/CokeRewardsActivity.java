@@ -34,6 +34,9 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -48,7 +51,7 @@ import com.google.ads.AdView;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 /**
- * Login/Main activity for the app
+ * Main activity for the app
  * 
  * @author breber
  */
@@ -142,7 +145,7 @@ public class CokeRewardsActivity extends Activity {
 		public void run() {
 			SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
 
-			if (dlg != null) {
+			if (dlg != null && dlg.isShowing()) {
 				dlg.dismiss();
 			}
 			
@@ -166,7 +169,7 @@ public class CokeRewardsActivity extends Activity {
 		public void run() {
 			SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
 
-			if (dlg != null) {
+			if (dlg != null && dlg.isShowing()) {
 				dlg.dismiss();
 			}
 			
@@ -193,7 +196,7 @@ public class CokeRewardsActivity extends Activity {
 	private Runnable errorRunnable = new Runnable() {
 		@Override
 		public void run() {
-			if (dlg != null) {
+			if (dlg != null && dlg.isShowing()) {
 				dlg.dismiss();
 			}
 			
@@ -341,6 +344,33 @@ public class CokeRewardsActivity extends Activity {
 	}
 
 	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		int menuId = item.getItemId();
+		
+		if (menuId == R.id.logout) {
+			SharedPreferences prefs = getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, Context.MODE_WORLD_WRITEABLE);
+			Editor edit = prefs.edit();
+
+			edit.remove(EMAIL_ADDRESS);
+			edit.remove(PASSWORD);
+			edit.remove(LOGGED_IN);
+			edit.commit();
+			
+			Intent register = new Intent(this, RegisterActivity.class);
+			startActivityForResult(register, REGISTER_REQUEST_CODE);
+		}
+		
+		return super.onMenuItemSelected(featureId, item);
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.menus, menu);
+	    return true;
+	}
+	
+	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 
@@ -368,8 +398,6 @@ public class CokeRewardsActivity extends Activity {
 		StringEntity se = new StringEntity(postValue);
 		se.setContentType("text/xml");
 		httppost.setEntity(se);
-
-		//		Log.d("POSTVAL", "Post: " + postValue);
 
 		HttpResponse response = httpclient.execute(httppost);
 
@@ -424,8 +452,6 @@ public class CokeRewardsActivity extends Activity {
 		edit.commit();
 
 		handler.post(mRunnable);
-
-		//		Log.d("RESULT", "Result: " + mResult);
 	}
 
 	/**
