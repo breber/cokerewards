@@ -5,5 +5,7 @@
     <string name="app_name">Coke Rewards</string>
     <string name="username">Username: </string>
     <string name="password">Password: </string>
+    <string name="loggingin">Logging on&#8230;</string>
+    <string name="submitting">Submitting code&#8230;</string>
 
 </resources>

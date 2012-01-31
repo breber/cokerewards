@@ -26,6 +26,8 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -95,6 +97,11 @@ public class CokeRewardsActivity extends Activity {
 	 * URL to POST requests to
 	 */
 	private static final String URL = "http://www.mycokerewards.com/xmlrpc";
+	
+	/**
+	 * Secure URL to POST requests to
+	 */
+	private static final String SECURE_URL = "https://secure.mycokerewards.com/xmlrpc";
 
 	/**
 	 * Request code for starting our RegisterActivity
@@ -120,6 +127,11 @@ public class CokeRewardsActivity extends Activity {
 	 * Google Analytics tracker
 	 */
 	private GoogleAnalyticsTracker tracker;
+	
+	/**
+	 * Dialog to display that we are submitting a code
+	 */
+	private Dialog dlg;
 
 	/**
 	 * A Runnable that will update the UI with values stored
@@ -130,6 +142,10 @@ public class CokeRewardsActivity extends Activity {
 		public void run() {
 			SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
 
+			if (dlg != null) {
+				dlg.dismiss();
+			}
+			
 			TextView tv = (TextView) findViewById(R.id.numPoints);
 			tv.setText("Number of Points: " + prefs.getString(POINTS, ""));
 
@@ -150,6 +166,10 @@ public class CokeRewardsActivity extends Activity {
 		public void run() {
 			SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
 
+			if (dlg != null) {
+				dlg.dismiss();
+			}
+			
 			if (prefs.getBoolean(ENTER_CODE_RESULT, false)) {
 				EditText tv = (EditText) findViewById(R.id.code);
 				tv.setText("");
@@ -173,6 +193,10 @@ public class CokeRewardsActivity extends Activity {
 	private Runnable errorRunnable = new Runnable() {
 		@Override
 		public void run() {
+			if (dlg != null) {
+				dlg.dismiss();
+			}
+			
 			Toast.makeText(CokeRewardsActivity.this, "An error has occurred. Please try again.", Toast.LENGTH_SHORT).show();
 		}
 	};
@@ -189,7 +213,7 @@ public class CokeRewardsActivity extends Activity {
 		// Create the adView
 		adView = new AdView(this, AdSize.BANNER, "a14f11d378bdbae");
 
-		// Lookup your LinearLayout assuming itÕs been given
+		// Lookup your LinearLayout assuming itï¿½s been given
 		// the attribute android:id="@+id/mainLayout"
 		LinearLayout layout = (LinearLayout) findViewById(R.id.adLayout);
 
@@ -204,6 +228,9 @@ public class CokeRewardsActivity extends Activity {
 		// Start the tracker in manual dispatch mode...
 		tracker.startNewSession("UA-3673402-16", 20, this);
 		tracker.setAnonymizeIp(true);
+		
+		dlg = new ProgressDialog(this);
+		dlg.setCancelable(false);
 
 		Button submitCode = (Button) findViewById(R.id.submitCode);
 		submitCode.setOnClickListener(new OnClickListener() {
@@ -220,13 +247,19 @@ public class CokeRewardsActivity extends Activity {
 					return;
 				}
 
+				dlg.show();
+				
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
 						try {
 							tracker.trackEvent("Button", "SubmitCode", "Submit Code button clicked", 0);
-
-							getData(CokeRewardsActivity.this, CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, finalCode), codeUpdateRunnable);
+							try {
+								getData(CokeRewardsActivity.this, CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, finalCode), codeUpdateRunnable, true);
+							} catch (Exception e) {
+								tracker.trackEvent("Exception", "ExceptionSecureSubmitCode", "Submit Code encountered an exception: " + e.getMessage(), 0);
+								getData(CokeRewardsActivity.this, CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, finalCode), codeUpdateRunnable, false);
+							}
 						} catch (Exception e) {
 							tracker.trackEvent("Exception", "ExceptionSubmitCode", "Submit Code encountered an exception: " + e.getMessage(), 0);
 							handler.post(errorRunnable);
@@ -271,7 +304,12 @@ public class CokeRewardsActivity extends Activity {
 			public void run() {
 				try {
 					tracker.trackEvent("CountFetch", "CountFetch", "Fetched number of points", 0);
-					getData(CokeRewardsActivity.this, CokeRewardsRequest.createLoginRequestBody(CokeRewardsActivity.this), updateUIRunnable);
+					try {
+						getData(CokeRewardsActivity.this, CokeRewardsRequest.createLoginRequestBody(CokeRewardsActivity.this), updateUIRunnable, true);
+					} catch (Exception e) {
+						tracker.trackEvent("Exception", "ExceptionSecureGetNumPoints", "Get number of points encountered an exception: " + e.getMessage(), 0);
+						getData(CokeRewardsActivity.this, CokeRewardsRequest.createLoginRequestBody(CokeRewardsActivity.this), updateUIRunnable, false);
+					}
 				} catch (Exception e) {
 					tracker.trackEvent("Exception", "ExceptionGetNumPoints", "Get number of points encountered an exception: " + e.getMessage(), 0);
 					handler.post(errorRunnable);
@@ -323,9 +361,9 @@ public class CokeRewardsActivity extends Activity {
 	 * @throws SAXException
 	 * @throws ParserConfigurationException
 	 */
-	public static void getData(Context ctx, String postValue, Runnable mRunnable) throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
+	public static void getData(Context ctx, String postValue, Runnable mRunnable, boolean isSecure) throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
 		HttpClient httpclient = new DefaultHttpClient();
-		HttpPost httppost = new HttpPost(URL);
+		HttpPost httppost = new HttpPost(isSecure ? SECURE_URL : URL);
 
 		StringEntity se = new StringEntity(postValue);
 		se.setContentType("text/xml");

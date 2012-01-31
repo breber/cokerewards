@@ -1,6 +1,8 @@
 package com.brianreber.cokerewards;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -30,6 +32,11 @@ public class RegisterActivity extends Activity {
 	 * Handler for posting runnables between threads
 	 */
 	private Handler mHandler = new Handler();
+	
+	/**
+	 * A loading dialog box
+	 */
+	private Dialog dlg;
 
 	/**
 	 * A Runnable that will close this activity if the user is
@@ -73,10 +80,15 @@ public class RegisterActivity extends Activity {
 
 		tracker = GoogleAnalyticsTracker.getInstance();
 
+		dlg = new ProgressDialog(this);
+		dlg.setTitle(R.string.loggingin);
+		dlg.setCancelable(false);
+		
 		Button login = (Button) findViewById(R.id.performLogin);
 		login.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				dlg.show();
 				getNumberOfPoints();
 			}
 		});
@@ -109,10 +121,17 @@ public class RegisterActivity extends Activity {
 			public void run() {
 				try {
 					tracker.trackEvent("Logon", "Logon", "Logging on", 0);
-
-					CokeRewardsActivity.getData(RegisterActivity.this,
-							CokeRewardsRequest.createLoginRequestBody(RegisterActivity.this),
-							updateUIRunnable);
+					try {
+						CokeRewardsActivity.getData(RegisterActivity.this,
+								CokeRewardsRequest.createLoginRequestBody(RegisterActivity.this),
+								updateUIRunnable, true);
+					} catch (Exception e) {
+						tracker.trackEvent("Exception", "ExceptionSecureLogon", "Exception when trying to log on: " + e.getMessage(), 0);
+						
+						CokeRewardsActivity.getData(RegisterActivity.this,
+								CokeRewardsRequest.createLoginRequestBody(RegisterActivity.this),
+								updateUIRunnable, false);
+					} 
 				} catch (Exception e) {
 					tracker.trackEvent("Exception", "ExceptionLogon", "Exception when trying to log on: " + e.getMessage(), 0);
 					e.printStackTrace();
