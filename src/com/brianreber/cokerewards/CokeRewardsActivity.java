@@ -227,7 +227,7 @@ public class CokeRewardsActivity extends Activity {
 		// Create the adView
 		adView = new AdView(this, AdSize.BANNER, "a14f11d378bdbae");
 
-		// Lookup your LinearLayout assuming it�s been given
+		// Lookup your LinearLayout assuming it's been given
 		// the attribute android:id="@+id/mainLayout"
 		LinearLayout layout = (LinearLayout) findViewById(R.id.adLayout);
 
@@ -245,6 +245,17 @@ public class CokeRewardsActivity extends Activity {
 		
 		dlg = new ProgressDialog(this);
 		dlg.setCancelable(false);
+		dlg.setTitle(R.string.submitting);
+		
+		SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
+		TextView tv = (TextView) findViewById(R.id.numPoints);
+		tv.setText("Number of Points: " + prefs.getString(POINTS, ""));
+
+		tv = (TextView) findViewById(R.id.screenName);
+		String name = ("".equals(prefs.getString(SCREEN_NAME, "")) ?
+				prefs.getString(EMAIL_ADDRESS, "") : prefs.getString(SCREEN_NAME, ""));
+
+		tv.setText("Welcome " + name + "!");
 
 		Button submitCode = (Button) findViewById(R.id.submitCode);
 		submitCode.setOnClickListener(new OnClickListener() {
@@ -394,8 +405,12 @@ public class CokeRewardsActivity extends Activity {
 		}
 	}
 
-	private static HttpClient createHttpClient()
-	{
+	/**
+	 * Create an HTTPClient that supports HTTP and HTTPS.
+	 * 
+	 * @return the HTTPClient
+	 */
+	private static HttpClient createHttpClient() {
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
 		schemeRegistry.register(new Scheme("https", new EasySSLSocketFactory(), 443));
@@ -422,7 +437,7 @@ public class CokeRewardsActivity extends Activity {
 	 * @throws ParserConfigurationException
 	 */
 	public static void getData(Context ctx, String postValue, Runnable mRunnable, boolean isSecure) throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
-	    HttpClient httpClient = createHttpClient();//new DefaultHttpClient();
+	    HttpClient httpClient = createHttpClient();
 		HttpPost httppost = new HttpPost(isSecure ? SECURE_URL : URL);
 
 		StringEntity se = new StringEntity(postValue);
