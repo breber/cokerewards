@@ -111,7 +111,7 @@ public class CokeRewardsActivity extends Activity {
 	 * URL to POST requests to
 	 */
 	private static final String URL = "http://www.mycokerewards.com/xmlrpc";
-	
+
 	/**
 	 * Secure URL to POST requests to
 	 */
@@ -141,7 +141,7 @@ public class CokeRewardsActivity extends Activity {
 	 * Google Analytics tracker
 	 */
 	private GoogleAnalyticsTracker tracker;
-	
+
 	/**
 	 * Dialog to display that we are submitting a code
 	 */
@@ -159,7 +159,7 @@ public class CokeRewardsActivity extends Activity {
 			if (dlg != null && dlg.isShowing()) {
 				dlg.dismiss();
 			}
-			
+
 			TextView tv = (TextView) findViewById(R.id.numPoints);
 			tv.setText("Number of Points: " + prefs.getString(POINTS, ""));
 
@@ -183,7 +183,7 @@ public class CokeRewardsActivity extends Activity {
 			if (dlg != null && dlg.isShowing()) {
 				dlg.dismiss();
 			}
-			
+
 			if (prefs.getBoolean(ENTER_CODE_RESULT, false)) {
 				EditText tv = (EditText) findViewById(R.id.code);
 				tv.setText("");
@@ -210,7 +210,7 @@ public class CokeRewardsActivity extends Activity {
 			if (dlg != null && dlg.isShowing()) {
 				dlg.dismiss();
 			}
-			
+
 			Toast.makeText(CokeRewardsActivity.this, "An error has occurred. Please try again.", Toast.LENGTH_SHORT).show();
 		}
 	};
@@ -242,11 +242,11 @@ public class CokeRewardsActivity extends Activity {
 		// Start the tracker in manual dispatch mode...
 		tracker.startNewSession("UA-3673402-16", 20, this);
 		tracker.setAnonymizeIp(true);
-		
+
 		dlg = new ProgressDialog(this);
 		dlg.setCancelable(false);
 		dlg.setTitle(R.string.submitting);
-		
+
 		SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
 		TextView tv = (TextView) findViewById(R.id.numPoints);
 		tv.setText("Number of Points: " + prefs.getString(POINTS, ""));
@@ -273,7 +273,7 @@ public class CokeRewardsActivity extends Activity {
 				}
 
 				dlg.show();
-				
+
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
@@ -370,7 +370,7 @@ public class CokeRewardsActivity extends Activity {
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		int menuId = item.getItemId();
-		
+
 		if (menuId == R.id.logout) {
 			SharedPreferences prefs = getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, Context.MODE_WORLD_WRITEABLE);
 			Editor edit = prefs.edit();
@@ -379,21 +379,21 @@ public class CokeRewardsActivity extends Activity {
 			edit.remove(PASSWORD);
 			edit.remove(LOGGED_IN);
 			edit.commit();
-			
+
 			Intent register = new Intent(this, RegisterActivity.class);
 			startActivityForResult(register, REGISTER_REQUEST_CODE);
 		}
-		
+
 		return super.onMenuItemSelected(featureId, item);
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.menus, menu);
-	    return true;
+		inflater.inflate(R.menu.menus, menu);
+		return true;
 	}
-	
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -414,18 +414,18 @@ public class CokeRewardsActivity extends Activity {
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
 		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
 		schemeRegistry.register(new Scheme("https", new EasySSLSocketFactory(), 443));
-		 
+
 		HttpParams params = new BasicHttpParams();
 		params.setParameter(ConnManagerPNames.MAX_TOTAL_CONNECTIONS, 30);
 		params.setParameter(ConnManagerPNames.MAX_CONNECTIONS_PER_ROUTE, new ConnPerRouteBean(30));
 		params.setParameter(HttpProtocolParams.USE_EXPECT_CONTINUE, false);
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-		 
+
 		ClientConnectionManager cm = new SingleClientConnManager(params, schemeRegistry);
 		return new DefaultHttpClient(cm, params);
 	}
 
-	
+
 	/**
 	 * Make a server request and update preferences accordingly.
 	 * 
@@ -437,7 +437,7 @@ public class CokeRewardsActivity extends Activity {
 	 * @throws ParserConfigurationException
 	 */
 	public static void getData(Context ctx, String postValue, Runnable mRunnable, boolean isSecure) throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
-	    HttpClient httpClient = createHttpClient();
+		HttpClient httpClient = createHttpClient();
 		HttpPost httppost = new HttpPost(isSecure ? SECURE_URL : URL);
 
 		StringEntity se = new StringEntity(postValue);
@@ -477,7 +477,10 @@ public class CokeRewardsActivity extends Activity {
 
 		for (int i = 0; i < nodes.getLength(); i++) {
 			Node n = nodes.item(i);
-			edit.putString(SCREEN_NAME, n.getTextContent());
+			String screenName = n.getTextContent();
+			if (!"".equals(screenName)) {
+				edit.putString(SCREEN_NAME, screenName);
+			}
 		}
 
 		nodes = (NodeList) xpath.evaluate("/methodResponse//member/value[../name/text()='ENTER_CODE_RESULT']", document, XPathConstants.NODESET);
