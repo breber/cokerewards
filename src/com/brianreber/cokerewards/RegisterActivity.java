@@ -1,7 +1,6 @@
 package com.brianreber.cokerewards;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -36,7 +35,7 @@ public class RegisterActivity extends Activity {
 	/**
 	 * A loading dialog box
 	 */
-	private Dialog dlg;
+	private ProgressDialog dlg;
 
 	/**
 	 * A Runnable that will close this activity if the user is
@@ -54,6 +53,8 @@ public class RegisterActivity extends Activity {
 				edit.remove(CokeRewardsActivity.EMAIL_ADDRESS);
 				edit.remove(CokeRewardsActivity.PASSWORD);
 				edit.commit();
+				
+				Toast.makeText(RegisterActivity.this, "Error logging in. Please try again.", Toast.LENGTH_SHORT).show();
 			}
 			
 			if (dlg != null && dlg.isShowing()) {
@@ -89,7 +90,7 @@ public class RegisterActivity extends Activity {
 		tracker = GoogleAnalyticsTracker.getInstance();
 
 		dlg = new ProgressDialog(this);
-		dlg.setTitle(R.string.loggingin);
+		dlg.setMessage(getResources().getText(R.string.loggingin));
 		dlg.setCancelable(false);
 		
 		Button login = (Button) findViewById(R.id.performLogin);

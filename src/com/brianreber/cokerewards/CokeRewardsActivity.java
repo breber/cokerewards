@@ -37,7 +37,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -145,7 +144,7 @@ public class CokeRewardsActivity extends Activity {
 	/**
 	 * Dialog to display that we are submitting a code
 	 */
-	private Dialog dlg;
+	private ProgressDialog dlg;
 
 	/**
 	 * A Runnable that will update the UI with values stored
@@ -245,7 +244,7 @@ public class CokeRewardsActivity extends Activity {
 
 		dlg = new ProgressDialog(this);
 		dlg.setCancelable(false);
-		dlg.setTitle(R.string.submitting);
+		dlg.setMessage(getResources().getText(R.string.submitting));
 
 		SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
 		TextView tv = (TextView) findViewById(R.id.numPoints);
