@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent"
+    android:padding="10dip" >
 
     <TextView
         android:id="@+id/usernameText"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/username" />
+        android:text="@string/username"
+        android:textSize="18sp" />
 
     <EditText
         android:id="@+id/username"
@@ -21,7 +23,8 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/username"
-        android:text="@string/password" />
+        android:text="@string/password"
+        android:textSize="18sp" />
 
     <EditText
         android:id="@+id/password"

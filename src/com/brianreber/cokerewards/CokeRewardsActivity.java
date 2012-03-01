@@ -42,6 +42,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
@@ -292,6 +293,16 @@ public class CokeRewardsActivity extends Activity {
 						}
 					}
 				}).start();
+			}
+		});
+		
+		Button visitWebsite = (Button) findViewById(R.id.showWebsite);
+		visitWebsite.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent i = new Intent(Intent.ACTION_VIEW);
+				i.setData(Uri.parse("http://m.mycokerewards.com/"));
+				startActivityForResult(i, REGISTER_REQUEST_CODE);
 			}
 		});
 

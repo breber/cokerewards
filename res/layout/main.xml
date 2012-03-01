@@ -40,6 +40,15 @@
             android:text="@string/submit" />
     </LinearLayout>
 
+    <Button
+        android:id="@+id/showWebsite"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/footer"
+        android:layout_margin="5dip"
+        android:padding="10dip"
+        android:text="@string/showWebsite" />
+
     <LinearLayout
         android:id="@+id/adLayout"
         android:layout_width="fill_parent"
