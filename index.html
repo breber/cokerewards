@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+	
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width,target-densitydpi=device-dpi,user-scalable=no,initial-scale=1.0">
+	
+	<title>CokeRewards</title>
+	
+	<link href="css/site.css" rel="stylesheet" type="text/css">
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/json2xml.js"></script>
+	<script type="text/javascript" src="js/xml2json.js"></script>
+	<script type="text/javascript" src="js/encodedecode.js"></script>
+	<script type="text/javascript" src="js/cokerewards.js"></script>
+	
+</head>
+<body>
+	<div class="center">
+		<h2>Welcome to CokeRewards!</h2>
+		<table class="center hide" id="logIn">
+			<tr>
+				<td>Username:</td>
+				<td><input type="text" id="username" /></td>
+			</tr>
+			<tr>
+				<td>Password:</td>
+				<td><input type="password" id="password" /></td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<input type="button" value="Login" onclick="javascript:performLogin();" />
+				</td>
+			</tr>
+		</table>
+		<table class="center hide" id="enterCode">
+			<tr>
+				<td colspan="2">Enter a Code:</td>
+			</tr>
+			<tr>
+				<td><input type="text" id="code" /></td>
+				<td><input type="button" value="Submit" onclick="javascript:submitCode();" /></td>
+			</tr>
+		</table>
+		<div id="errorMsg" />
+	</div>
+	
+</body>
+</html>

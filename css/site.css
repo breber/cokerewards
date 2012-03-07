@@ -1,0 +1,16 @@
+html,body {
+	font-family: Arial, helvetica, verdana, sans-serif;
+	background-color: red;
+	vertical-align: middle;
+}
+
+.hide {
+	display:none;
+}
+
+.center {
+	text-align: center;
+	margin-left: auto;
+	margin-right: auto;
+	border: none;
+}
