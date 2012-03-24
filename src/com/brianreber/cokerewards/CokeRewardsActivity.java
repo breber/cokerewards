@@ -256,7 +256,15 @@ public class CokeRewardsActivity extends Activity {
 
 		SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
 		TextView tv = (TextView) findViewById(R.id.numPoints);
-		tv.setText("Number of Points: " + prefs.getInt(POINTS, 0));
+
+		try {
+			tv.setText("Number of Points: " + prefs.getInt(POINTS, 0));
+		} catch (ClassCastException ex) {
+			try {
+				tv.setText("Number of Points: " + prefs.getString(POINTS, ""));
+			} catch (Exception e) {	}
+			getNumberOfPoints();
+		}
 
 		tv = (TextView) findViewById(R.id.screenName);
 		String name = ("".equals(prefs.getString(SCREEN_NAME, "")) ?
