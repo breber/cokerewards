@@ -43,6 +43,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
@@ -103,6 +104,11 @@ public class CokeRewardsActivity extends Activity {
 	public static final String ENTER_CODE_RESULT = "enterCodeResult";
 
 	/**
+	 * Result of latest code entry
+	 */
+	public static final String POINTS_EARNED_RESULT = "pointsEarnedResult";
+
+	/**
 	 * Result of messages
 	 */
 	public static final String MESSAGES = "messagesResult";
@@ -161,7 +167,7 @@ public class CokeRewardsActivity extends Activity {
 			}
 
 			TextView tv = (TextView) findViewById(R.id.numPoints);
-			tv.setText("Number of Points: " + prefs.getString(POINTS, ""));
+			tv.setText("Number of Points: " + prefs.getInt(POINTS, 0));
 
 			tv = (TextView) findViewById(R.id.screenName);
 			String name = ("".equals(prefs.getString(SCREEN_NAME, "")) ?
@@ -188,7 +194,8 @@ public class CokeRewardsActivity extends Activity {
 				EditText tv = (EditText) findViewById(R.id.code);
 				tv.setText("");
 
-				Toast.makeText(getApplicationContext(), "Code submitted successfully", Toast.LENGTH_SHORT).show();
+				int numPointsEarned = prefs.getInt(POINTS_EARNED_RESULT, 0);
+				Toast.makeText(getApplicationContext(), "Code submitted successfully. " + numPointsEarned + " points earned!", Toast.LENGTH_SHORT).show();
 				tracker.trackEvent("SuccessfulCode", "SuccessfulCode", "SuccessfulCodeSubmission", 0);
 			} else {
 				String messages = prefs.getString(MESSAGES, "");
@@ -249,7 +256,7 @@ public class CokeRewardsActivity extends Activity {
 
 		SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
 		TextView tv = (TextView) findViewById(R.id.numPoints);
-		tv.setText("Number of Points: " + prefs.getString(POINTS, ""));
+		tv.setText("Number of Points: " + prefs.getInt(POINTS, 0));
 
 		tv = (TextView) findViewById(R.id.screenName);
 		String name = ("".equals(prefs.getString(SCREEN_NAME, "")) ?
@@ -295,7 +302,7 @@ public class CokeRewardsActivity extends Activity {
 				}).start();
 			}
 		});
-		
+
 		Button visitWebsite = (Button) findViewById(R.id.showWebsite);
 		visitWebsite.setOnClickListener(new OnClickListener() {
 			@Override
@@ -385,9 +392,7 @@ public class CokeRewardsActivity extends Activity {
 			SharedPreferences prefs = getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, Context.MODE_WORLD_WRITEABLE);
 			Editor edit = prefs.edit();
 
-			edit.remove(EMAIL_ADDRESS);
-			edit.remove(PASSWORD);
-			edit.remove(LOGGED_IN);
+			edit.clear();
 			edit.commit();
 
 			Intent register = new Intent(this, RegisterActivity.class);
@@ -448,7 +453,12 @@ public class CokeRewardsActivity extends Activity {
 	 */
 	public static void getData(Context ctx, String postValue, Runnable mRunnable, boolean isSecure) throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
 		HttpClient httpClient = createHttpClient();
-		HttpPost httppost = new HttpPost(isSecure ? SECURE_URL : URL);
+		HttpPost httppost;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			httppost = new HttpPost(isSecure ? SECURE_URL : URL);
+		} else {
+			httppost = new HttpPost(URL);
+		}
 
 		StringEntity se = new StringEntity(postValue);
 		se.setContentType("text/xml");
@@ -469,38 +479,26 @@ public class CokeRewardsActivity extends Activity {
 		SharedPreferences prefs = ctx.getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_WRITEABLE);
 		Editor edit = prefs.edit();
 
-		NodeList nodes = (NodeList) xpath.evaluate("/methodResponse//member/value[../name/text()='POINTS']", document, XPathConstants.NODESET);
-
-		for (int i = 0; i < nodes.getLength(); i++) {
-			Node n = nodes.item(i);
-			edit.putString(POINTS, n.getTextContent());
+		Double points = (Double) xpath.evaluate("/methodResponse//member/value[../name/text()='POINTS']//text()", document, XPathConstants.NUMBER);
+		if (points != null) {
+			edit.putInt(POINTS, points.intValue());
 		}
 
-		nodes = (NodeList) xpath.evaluate("/methodResponse//member/value[../name/text()='LOGIN_RESULT']", document, XPathConstants.NODESET);
+		Boolean loggedIn = (Boolean) xpath.evaluate("/methodResponse//member/value[../name/text()='LOGIN_RESULT']//text()", document, XPathConstants.BOOLEAN);
+		edit.putBoolean(LOGGED_IN, loggedIn);
 
-		for (int i = 0; i < nodes.getLength(); i++) {
-			Node n = nodes.item(i);
-			edit.putBoolean(LOGGED_IN, Boolean.parseBoolean(n.getTextContent()));
+		String screenName = (String) xpath.evaluate("/methodResponse//member/value[../name/text()='SCREEN_NAME']//text()", document, XPathConstants.STRING);
+		if (!"".equals(screenName)) {
+			edit.putString(SCREEN_NAME, screenName);
 		}
 
-		nodes = (NodeList) xpath.evaluate("/methodResponse//member/value[../name/text()='SCREEN_NAME']", document, XPathConstants.NODESET);
+		Boolean codeResult = (Boolean) xpath.evaluate("/methodResponse//member/value[../name/text()='ENTER_CODE_RESULT']//text()", document, XPathConstants.BOOLEAN);
+		edit.putBoolean(ENTER_CODE_RESULT, codeResult);
 
-		for (int i = 0; i < nodes.getLength(); i++) {
-			Node n = nodes.item(i);
-			String screenName = n.getTextContent();
-			if (!"".equals(screenName)) {
-				edit.putString(SCREEN_NAME, screenName);
-			}
-		}
+		Double pointsEarned = (Double) xpath.evaluate("/methodResponse//member/value[../name/text()='POINTS_EARNED']//text()", document, XPathConstants.NUMBER);
+		edit.putInt(POINTS_EARNED_RESULT, (pointsEarned != null) ? pointsEarned.intValue() : 0);
 
-		nodes = (NodeList) xpath.evaluate("/methodResponse//member/value[../name/text()='ENTER_CODE_RESULT']", document, XPathConstants.NODESET);
-
-		for (int i = 0; i < nodes.getLength(); i++) {
-			Node n = nodes.item(i);
-			edit.putBoolean(ENTER_CODE_RESULT, Boolean.parseBoolean(n.getTextContent()));
-		}
-
-		nodes = (NodeList) xpath.evaluate("/methodResponse//member/value[../name/text()='MESSAGES']", document, XPathConstants.NODESET);
+		NodeList nodes = (NodeList) xpath.evaluate("/methodResponse//member/value[../name/text()='MESSAGES']", document, XPathConstants.NODESET);
 
 		for (int i = 0; i < nodes.getLength(); i++) {
 			Node n = nodes.item(i);

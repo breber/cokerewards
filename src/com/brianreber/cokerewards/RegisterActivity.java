@@ -11,8 +11,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.google.ads.AdRequest;
+import com.google.ads.AdSize;
+import com.google.ads.AdView;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 /**
@@ -31,11 +35,16 @@ public class RegisterActivity extends Activity {
 	 * Handler for posting runnables between threads
 	 */
 	private Handler mHandler = new Handler();
-	
+
 	/**
 	 * A loading dialog box
 	 */
 	private ProgressDialog dlg;
+
+	/**
+	 * The view where ads with display
+	 */
+	private AdView adView;
 
 	/**
 	 * A Runnable that will close this activity if the user is
@@ -53,10 +62,10 @@ public class RegisterActivity extends Activity {
 				edit.remove(CokeRewardsActivity.EMAIL_ADDRESS);
 				edit.remove(CokeRewardsActivity.PASSWORD);
 				edit.commit();
-				
+
 				Toast.makeText(RegisterActivity.this, "Error logging in. Please try again.", Toast.LENGTH_SHORT).show();
 			}
-			
+
 			if (dlg != null && dlg.isShowing()) {
 				dlg.dismiss();
 			}
@@ -72,7 +81,7 @@ public class RegisterActivity extends Activity {
 			if (dlg != null && dlg.isShowing()) {
 				dlg.dismiss();
 			}
-			
+
 			Toast.makeText(RegisterActivity.this, "Error logging in. Please try again.", Toast.LENGTH_SHORT).show();
 		}
 	};
@@ -89,10 +98,23 @@ public class RegisterActivity extends Activity {
 
 		tracker = GoogleAnalyticsTracker.getInstance();
 
+		// Create the adView
+		adView = new AdView(this, AdSize.BANNER, "a14f11d378bdbae");
+
+		// Lookup your LinearLayout assuming it's been given
+		// the attribute android:id="@+id/mainLayout"
+		LinearLayout layout = (LinearLayout) findViewById(R.id.adLayout);
+
+		// Add the adView to it
+		layout.addView(adView);
+
+		// Initiate a generic request to load it with an ad
+		adView.loadAd(new AdRequest());
+
 		dlg = new ProgressDialog(this);
 		dlg.setMessage(getResources().getText(R.string.loggingin));
 		dlg.setCancelable(false);
-		
+
 		Button login = (Button) findViewById(R.id.performLogin);
 		login.setOnClickListener(new OnClickListener() {
 			@Override
@@ -101,6 +123,13 @@ public class RegisterActivity extends Activity {
 				getNumberOfPoints();
 			}
 		});
+	}
+
+	@Override
+	protected void onDestroy() {
+		adView.destroy();
+
+		super.onDestroy();
 	}
 
 	/**
@@ -136,11 +165,11 @@ public class RegisterActivity extends Activity {
 								updateUIRunnable, true);
 					} catch (Exception e) {
 						tracker.trackEvent("Exception", "ExceptionSecureLogon", "Exception when trying to log on: " + e.getMessage(), 0);
-						
+
 						CokeRewardsActivity.getData(RegisterActivity.this,
 								CokeRewardsRequest.createLoginRequestBody(RegisterActivity.this),
 								updateUIRunnable, false);
-					} 
+					}
 				} catch (Exception e) {
 					tracker.trackEvent("Exception", "ExceptionLogon", "Exception when trying to log on: " + e.getMessage(), 0);
 					e.printStackTrace();

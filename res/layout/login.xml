@@ -40,4 +40,11 @@
         android:layout_below="@+id/password"
         android:text="@string/submit" />
 
+    <LinearLayout
+        android:id="@+id/adLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center" />
+
 </RelativeLayout>
