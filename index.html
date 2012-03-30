@@ -1,49 +1,63 @@
 <!DOCTYPE html>
 <html>
 <head>
-	
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<meta name="viewport" content="width=device-width,target-densitydpi=device-dpi,user-scalable=no,initial-scale=1.0">
 	
-	<title>CokeRewards</title>
+	<title>Coke Rewards</title>
 	
-	<link href="css/site.css" rel="stylesheet" type="text/css">
+	<link rel="stylesheet" href="css/jquery.mobile.min.css" type="text/css" />
+	<link rel="stylesheet" href="css/site.css" type="text/css" />
 	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/jquery.mobile.min.js"></script>
 	<script type="text/javascript" src="js/json2xml.js"></script>
 	<script type="text/javascript" src="js/xml2json.js"></script>
 	<script type="text/javascript" src="js/encodedecode.js"></script>
 	<script type="text/javascript" src="js/cokerewards.js"></script>
-	
 </head>
 <body>
-	<div class="center">
-		<h2>Welcome to CokeRewards!</h2>
-		<table class="center hide" id="logIn">
-			<tr>
-				<td>Username:</td>
-				<td><input type="text" id="username" /></td>
-			</tr>
-			<tr>
-				<td>Password:</td>
-				<td><input type="password" id="password" /></td>
-			</tr>
-			<tr>
-				<td colspan="2">
-					<input type="button" value="Login" onclick="javascript:performLogin();" />
-				</td>
-			</tr>
-		</table>
-		<table class="center hide" id="enterCode">
-			<tr>
-				<td colspan="2">Enter a Code:</td>
-			</tr>
-			<tr>
-				<td><input type="text" id="code" /></td>
-				<td><input type="button" value="Submit" onclick="javascript:submitCode();" /></td>
-			</tr>
-		</table>
-		<div id="errorMsg" />
+	<div data-role="page" id="logon">
+		<div data-role="header">
+			<h1>Coke Rewards!</h1>
+		</div>
+		
+		<div data-role="content" class="center">
+			<h2>Welcome to CokeRewards!</h2>
+			<table class="center" id="logIn">
+				<tr>
+					<td>Username:</td>
+					<td><input type="text" id="username" /></td>
+				</tr>
+				<tr>
+					<td>Password:</td>
+					<td><input type="password" id="password" /></td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<input type="button" value="Login" onclick="javascript:performLogin();" />
+					</td>
+				</tr>
+			</table>
+		</div>
 	</div>
-	
+	<div data-role="page" id="submitCode">
+		<div data-role="header">
+			<h1>Coke Rewards!</h1>
+		</div>
+		
+		<div data-role="content"  class="center">
+			<h2>
+				Welcome <span id="name"></span>!
+			</h2>
+			<h3>You have <span id="points"></span> points.</h3>
+
+			<hr />
+
+			<h2>Enter a Code:</h2>
+			<input type="text" id="code" />
+			<input type="button" value="Submit" onclick="javascript:submitCode();" />
+			<div id="errorMsg" />
+	  	</div>
+	</div>
 </body>
 </html>

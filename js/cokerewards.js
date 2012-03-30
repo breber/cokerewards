@@ -1,4 +1,4 @@
-var URL = "https://secure.mycokerewards.com/xmlrpc";
+var URL = "https://www.mycokerewards.com/xmlrpc";
 
 $().ready(function() {
 	chooseView();
@@ -6,11 +6,9 @@ $().ready(function() {
 
 function chooseView() {
 	if (isLoggedIn()) {
-		$("#logIn").hide();
-		$("#enterCode").show();
+		$.mobile.changePage("#submitCode");
 	} else {
-		$("#logIn").show();
-		$("#enterCode").hide();
+		$.mobile.changePage("#logon");
 	}
 };
 
