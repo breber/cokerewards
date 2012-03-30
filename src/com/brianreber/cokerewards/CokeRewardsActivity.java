@@ -492,16 +492,22 @@ public class CokeRewardsActivity extends Activity {
 			edit.putInt(POINTS, points.intValue());
 		}
 
-		Boolean loggedIn = (Boolean) xpath.evaluate("/methodResponse//member/value[../name/text()='LOGIN_RESULT']//text()", document, XPathConstants.BOOLEAN);
-		edit.putBoolean(LOGGED_IN, loggedIn);
+		NodeList loggedIn = (NodeList) xpath.evaluate("/methodResponse//member/value[../name/text()='LOGIN_RESULT']", document, XPathConstants.NODESET);
+		for (int i = 0; i < loggedIn.getLength(); i++) {
+			Node n = loggedIn.item(i);
+			edit.putBoolean(LOGGED_IN, Boolean.parseBoolean(n.getTextContent()));
+		}
 
 		String screenName = (String) xpath.evaluate("/methodResponse//member/value[../name/text()='SCREEN_NAME']//text()", document, XPathConstants.STRING);
 		if (!"".equals(screenName)) {
 			edit.putString(SCREEN_NAME, screenName);
 		}
 
-		Boolean codeResult = (Boolean) xpath.evaluate("/methodResponse//member/value[../name/text()='ENTER_CODE_RESULT']//text()", document, XPathConstants.BOOLEAN);
-		edit.putBoolean(ENTER_CODE_RESULT, codeResult);
+		NodeList codeResult = (NodeList) xpath.evaluate("/methodResponse//member/value[../name/text()='ENTER_CODE_RESULT']", document, XPathConstants.NODESET);
+		for (int i = 0; i < codeResult.getLength(); i++) {
+			Node n = codeResult.item(i);
+			edit.putBoolean(ENTER_CODE_RESULT, Boolean.parseBoolean(n.getTextContent()));
+		}
 
 		Double pointsEarned = (Double) xpath.evaluate("/methodResponse//member/value[../name/text()='POINTS_EARNED']//text()", document, XPathConstants.NUMBER);
 		edit.putInt(POINTS_EARNED_RESULT, (pointsEarned != null) ? pointsEarned.intValue() : 0);
