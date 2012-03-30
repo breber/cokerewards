@@ -121,7 +121,7 @@ public class CokeRewardsActivity extends Activity {
 	/**
 	 * Secure URL to POST requests to
 	 */
-	private static final String SECURE_URL = "https://secure.mycokerewards.com/xmlrpc";
+	private static final String SECURE_URL = "https://www.mycokerewards.com/xmlrpc";
 
 	/**
 	 * Request code for starting our RegisterActivity
