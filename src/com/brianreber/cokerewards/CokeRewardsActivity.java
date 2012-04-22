@@ -53,13 +53,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.ads.AdRequest;
-import com.google.ads.AdSize;
-import com.google.ads.AdView;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 /**
@@ -137,11 +133,6 @@ public class CokeRewardsActivity extends Activity {
 	 * The request response
 	 */
 	private static String mResult;
-
-	/**
-	 * The view where ads with display
-	 */
-	private AdView adView;
 
 	/**
 	 * Google Analytics tracker
@@ -231,19 +222,6 @@ public class CokeRewardsActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		// Create the adView
-		adView = new AdView(this, AdSize.BANNER, "a14f11d378bdbae");
-
-		// Lookup your LinearLayout assuming it's been given
-		// the attribute android:id="@+id/mainLayout"
-		LinearLayout layout = (LinearLayout) findViewById(R.id.adLayout);
-
-		// Add the adView to it
-		layout.addView(adView);
-
-		// Initiate a generic request to load it with an ad
-		adView.loadAd(new AdRequest());
-
 		tracker = GoogleAnalyticsTracker.getInstance();
 
 		// Start the tracker in manual dispatch mode...
@@ -331,8 +309,6 @@ public class CokeRewardsActivity extends Activity {
 
 	@Override
 	public void onDestroy() {
-		adView.destroy();
-
 		// Stop the tracker when it is no longer needed.
 		tracker.stopSession();
 

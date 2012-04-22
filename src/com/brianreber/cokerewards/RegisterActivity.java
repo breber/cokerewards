@@ -11,12 +11,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.google.ads.AdRequest;
-import com.google.ads.AdSize;
-import com.google.ads.AdView;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 /**
@@ -40,11 +36,6 @@ public class RegisterActivity extends Activity {
 	 * A loading dialog box
 	 */
 	private ProgressDialog dlg;
-
-	/**
-	 * The view where ads with display
-	 */
-	private AdView adView;
 
 	/**
 	 * A Runnable that will close this activity if the user is
@@ -98,19 +89,6 @@ public class RegisterActivity extends Activity {
 
 		tracker = GoogleAnalyticsTracker.getInstance();
 
-		// Create the adView
-		adView = new AdView(this, AdSize.BANNER, "a14f11d378bdbae");
-
-		// Lookup your LinearLayout assuming it's been given
-		// the attribute android:id="@+id/mainLayout"
-		LinearLayout layout = (LinearLayout) findViewById(R.id.adLayout);
-
-		// Add the adView to it
-		layout.addView(adView);
-
-		// Initiate a generic request to load it with an ad
-		adView.loadAd(new AdRequest());
-
 		dlg = new ProgressDialog(this);
 		dlg.setMessage(getResources().getText(R.string.loggingin));
 		dlg.setCancelable(false);
@@ -123,13 +101,6 @@ public class RegisterActivity extends Activity {
 				getNumberOfPoints();
 			}
 		});
-	}
-
-	@Override
-	protected void onDestroy() {
-		adView.destroy();
-
-		super.onDestroy();
 	}
 
 	/**

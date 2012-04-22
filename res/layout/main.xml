@@ -1,59 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content" >
 
-    <TextView
-        android:id="@+id/screenName"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dip"
-        android:textSize="22sp" />
-
-    <TextView
-        android:id="@+id/numPoints"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/screenName"
-        android:layout_margin="5dip"
-        android:textSize="22sp" />
-
     <LinearLayout
-        android:id="@+id/footer"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/numPoints"
-        android:layout_margin="5dip"
-        android:orientation="horizontal" >
+        android:orientation="vertical" >
 
-        <EditText
-            android:id="@+id/code"
-            android:layout_width="0dip"
+        <TextView
+            android:id="@+id/screenName"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:inputType="textCapCharacters|textNoSuggestions" />
+            android:layout_margin="5dip"
+            android:textSize="22sp" />
+
+        <TextView
+            android:id="@+id/numPoints"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dip"
+            android:textSize="22sp" />
+
+        <LinearLayout
+            android:id="@+id/footer"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dip"
+            android:orientation="horizontal" >
+
+            <EditText
+                android:id="@+id/code"
+                android:layout_width="0dip"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="textCapCharacters|textNoSuggestions" />
+
+            <Button
+                android:id="@+id/submitCode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/submit" />
+        </LinearLayout>
 
         <Button
-            android:id="@+id/submitCode"
-            android:layout_width="wrap_content"
+            android:id="@+id/showWebsite"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/submit" />
+            android:layout_margin="5dip"
+            android:padding="10dip"
+            android:text="@string/showWebsite" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/showWebsite"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/footer"
-        android:layout_margin="5dip"
-        android:padding="10dip"
-        android:text="@string/showWebsite" />
-
-    <LinearLayout
-        android:id="@+id/adLayout"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+    <com.google.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
+        android:layout_height="50dip"
         android:layout_alignParentBottom="true"
-        android:gravity="center" />
+        ads:adSize="BANNER"
+        ads:adUnitId="56ccc6376d004a4e"
+        ads:loadAdOnCreate="true"
+        ads:testDevices="TEST_EMULATOR"
+        android:gravity="center_horizontal" />
 
 </RelativeLayout>
