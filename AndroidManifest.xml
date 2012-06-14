@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.brianreber.cokerewards"
     android:versionCode="18"
-    android:versionName="1.1.2" >
+    android:versionName="1.2.0_beta" >
 
     <uses-sdk
         android:minSdkVersion="8"
