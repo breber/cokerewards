@@ -327,9 +327,6 @@ public class CokeRewardsActivity extends Activity {
 	 */
 	public static boolean isLoggedIn(Context ctx) {
 		SharedPreferences prefs = ctx.getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
-		System.out.println("email: " + prefs.contains(EMAIL_ADDRESS));
-		System.out.println("pass : " + prefs.contains(PASSWORD));
-		System.out.println("loggedin: " + prefs.getBoolean(LOGGED_IN, false));
 		return prefs.contains(EMAIL_ADDRESS) && prefs.contains(PASSWORD) && prefs.getBoolean(LOGGED_IN, false);
 	}
 
@@ -392,7 +389,11 @@ public class CokeRewardsActivity extends Activity {
 		}
 
 		if (data.containsKey("SCREEN_NAME")) {
-			edit.putString(SCREEN_NAME, (String) data.get("SCREEN_NAME"));
+			String screenName = (String) data.get("SCREEN_NAME");
+
+			if (screenName != null && !"".equals(screenName)) {
+				edit.putString(SCREEN_NAME, screenName);
+			}
 		}
 
 		if (data.containsKey("ENTER_CODE_RESULT")) {
