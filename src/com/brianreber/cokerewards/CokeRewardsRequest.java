@@ -44,7 +44,7 @@ public class CokeRewardsRequest {
 			data.put("screenName", screenName);
 			data.put("VERSION", "4.1");
 
-			XMLRPCClient client = new XMLRPCClient(new URL(SECURE_URL), XMLRPCClient.FLAGS_NIL);
+			XMLRPCClient client = new XMLRPCClient(new URL(SECURE_URL), XMLRPCClient.FLAGS_APACHE_WS);
 			Object[] temp = (Object[]) client.call("points.pointsBalance", data);
 			if (temp != null) {
 				return (Map<String, Object>) temp[0];
@@ -80,7 +80,7 @@ public class CokeRewardsRequest {
 			data.put("capCode", code);
 			data.put("VERSION", "4.1");
 
-			XMLRPCClient client = new XMLRPCClient(new URL(SECURE_URL), XMLRPCClient.FLAGS_NIL);
+			XMLRPCClient client = new XMLRPCClient(new URL(SECURE_URL), XMLRPCClient.FLAGS_APACHE_WS);
 			Object[] temp = (Object[]) client.call("points.enterCode", data);
 			if (temp != null) {
 				return (Map<String, Object>) temp[0];
