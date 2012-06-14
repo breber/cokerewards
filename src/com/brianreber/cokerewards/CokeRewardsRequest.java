@@ -1,12 +1,14 @@
 package com.brianreber.cokerewards;
 
-import java.io.StringWriter;
-
-import org.xmlpull.v1.XmlSerializer;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Xml;
+import de.timroes.axmlrpc.XMLRPCClient;
+import de.timroes.axmlrpc.XMLRPCException;
 
 /**
  * Build requests that should be sent in POST requests
@@ -17,88 +19,43 @@ import android.util.Xml;
 public class CokeRewardsRequest {
 
 	/**
+	 * Secure URL to POST requests to
+	 */
+	private static final String SECURE_URL = "https://www.mycokerewards.com/xmlrpc";
+
+	/**
 	 * Create a basic retrieve points balance request
 	 * 
 	 * @param ctx with which we can retrieve preferences
 	 * @return a POST body
 	 */
-	public static String createLoginRequestBody(Context ctx) {
+	@SuppressWarnings("unchecked")
+	public static Map<String, Object> createLoginRequestBody(Context ctx) {
 		SharedPreferences prefs = ctx.getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, Context.MODE_WORLD_READABLE);
 
 		String emailAddress = prefs.getString(CokeRewardsActivity.EMAIL_ADDRESS, "");
 		String password = prefs.getString(CokeRewardsActivity.PASSWORD, "");
 		String screenName = prefs.getString(CokeRewardsActivity.SCREEN_NAME, "");
 
-		XmlSerializer serializer = Xml.newSerializer();
-		StringWriter writer = new StringWriter();
 		try {
-			serializer.setOutput(writer);
-			serializer.startDocument("UTF-8", true);
-			serializer.startTag("", "methodCall");
-			serializer.startTag("", "methodName");
-			serializer.text("points.pointsBalance");
-			serializer.endTag("", "methodName");
+			Map<String, Object> data = new HashMap<String, Object>();
+			data.put("emailAddress", emailAddress);
+			data.put("password", password);
+			data.put("screenName", screenName);
+			data.put("VERSION", "4.1");
 
-			serializer.startTag("", "params");
-			serializer.startTag("", "param");
-			serializer.startTag("", "value");
-			serializer.startTag("", "struct");
-
-			serializer.startTag("", "member");
-			serializer.startTag("", "name");
-			serializer.text("emailAddress");
-			serializer.endTag("", "name");
-			serializer.startTag("", "value");
-			serializer.startTag("", "string");
-			serializer.text(emailAddress);
-			serializer.endTag("", "string");
-			serializer.endTag("", "value");
-			serializer.endTag("", "member");
-
-			serializer.startTag("", "member");
-			serializer.startTag("", "name");
-			serializer.text("password");
-			serializer.endTag("", "name");
-			serializer.startTag("", "value");
-			serializer.startTag("", "string");
-			serializer.text(password);
-			serializer.endTag("", "string");
-			serializer.endTag("", "value");
-			serializer.endTag("", "member");
-
-			serializer.startTag("", "member");
-			serializer.startTag("", "name");
-			serializer.text("screenName");
-			serializer.endTag("", "name");
-			serializer.startTag("", "value");
-			serializer.startTag("", "string");
-			serializer.text(screenName);
-			serializer.endTag("", "string");
-			serializer.endTag("", "value");
-			serializer.endTag("", "member");
-
-			serializer.startTag("", "member");
-			serializer.startTag("", "name");
-			serializer.text("VERSION");
-			serializer.endTag("", "name");
-			serializer.startTag("", "value");
-			serializer.startTag("", "string");
-			serializer.text("4.1");
-			serializer.endTag("", "string");
-			serializer.endTag("", "value");
-			serializer.endTag("", "member");
-
-			serializer.endTag("", "struct");
-			serializer.endTag("", "value");
-			serializer.endTag("", "param");
-			serializer.endTag("", "params");
-
-			serializer.endTag("", "methodCall");
-			serializer.endDocument();
-			return writer.toString();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+			XMLRPCClient client = new XMLRPCClient(new URL(SECURE_URL));
+			Object[] temp = (Object[]) client.call("points.pointsBalance", data);
+			if (temp != null) {
+				return (Map<String, Object>) temp[0];
+			}
+		} catch (MalformedURLException e1) {
+			e1.printStackTrace();
+		} catch (XMLRPCException e) {
+			e.printStackTrace();
 		}
+
+		return new HashMap<String, Object>();
 	}
 
 	/**
@@ -107,94 +64,34 @@ public class CokeRewardsRequest {
 	 * @param ctx with which we can retrieve preferences
 	 * @return a POST body
 	 */
-	public static String createCodeRequestBody(Context ctx, String code) {
+	@SuppressWarnings("unchecked")
+	public static Map<String, Object> createCodeRequestBody(Context ctx, String code) {
 		SharedPreferences prefs = ctx.getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, Context.MODE_WORLD_READABLE);
 
 		String emailAddress = prefs.getString(CokeRewardsActivity.EMAIL_ADDRESS, "");
 		String password = prefs.getString(CokeRewardsActivity.PASSWORD, "");
 		String screenName = prefs.getString(CokeRewardsActivity.SCREEN_NAME, "");
 
-		XmlSerializer serializer = Xml.newSerializer();
-		StringWriter writer = new StringWriter();
 		try {
-			serializer.setOutput(writer);
-			serializer.startDocument("UTF-8", true);
-			serializer.startTag("", "methodCall");
-			serializer.startTag("", "methodName");
-			serializer.text("points.enterCode");
-			serializer.endTag("", "methodName");
+			Map<String, Object> data = new HashMap<String, Object>();
+			data.put("emailAddress", emailAddress);
+			data.put("password", password);
+			data.put("screenName", screenName);
+			data.put("capCode", code);
+			data.put("VERSION", "4.1");
 
-			serializer.startTag("", "params");
-			serializer.startTag("", "param");
-			serializer.startTag("", "value");
-			serializer.startTag("", "struct");
-
-			serializer.startTag("", "member");
-			serializer.startTag("", "name");
-			serializer.text("emailAddress");
-			serializer.endTag("", "name");
-			serializer.startTag("", "value");
-			serializer.startTag("", "string");
-			serializer.text(emailAddress);
-			serializer.endTag("", "string");
-			serializer.endTag("", "value");
-			serializer.endTag("", "member");
-
-			serializer.startTag("", "member");
-			serializer.startTag("", "name");
-			serializer.text("password");
-			serializer.endTag("", "name");
-			serializer.startTag("", "value");
-			serializer.startTag("", "string");
-			serializer.text(password);
-			serializer.endTag("", "string");
-			serializer.endTag("", "value");
-			serializer.endTag("", "member");
-
-			serializer.startTag("", "member");
-			serializer.startTag("", "name");
-			serializer.text("screenName");
-			serializer.endTag("", "name");
-			serializer.startTag("", "value");
-			serializer.startTag("", "string");
-			serializer.text(screenName);
-			serializer.endTag("", "string");
-			serializer.endTag("", "value");
-			serializer.endTag("", "member");
-
-			serializer.startTag("", "member");
-			serializer.startTag("", "name");
-			serializer.text("capCode");
-			serializer.endTag("", "name");
-			serializer.startTag("", "value");
-			serializer.startTag("", "string");
-			serializer.text(code);
-			serializer.endTag("", "string");
-			serializer.endTag("", "value");
-			serializer.endTag("", "member");
-
-			serializer.startTag("", "member");
-			serializer.startTag("", "name");
-			serializer.text("VERSION");
-			serializer.endTag("", "name");
-			serializer.startTag("", "value");
-			serializer.startTag("", "string");
-			serializer.text("4.1");
-			serializer.endTag("", "string");
-			serializer.endTag("", "value");
-			serializer.endTag("", "member");
-
-			serializer.endTag("", "struct");
-			serializer.endTag("", "value");
-			serializer.endTag("", "param");
-			serializer.endTag("", "params");
-
-			serializer.endTag("", "methodCall");
-			serializer.endDocument();
-			return writer.toString();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+			XMLRPCClient client = new XMLRPCClient(new URL(SECURE_URL));
+			Object[] temp = (Object[]) client.call("points.enterCode", data);
+			if (temp != null) {
+				return (Map<String, Object>) temp[0];
+			}
+		} catch (MalformedURLException e1) {
+			e1.printStackTrace();
+		} catch (XMLRPCException e) {
+			e.printStackTrace();
 		}
+
+		return new HashMap<String, Object>();
 	}
 
 }
