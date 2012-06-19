@@ -1,39 +1,11 @@
 package com.brianreber.cokerewards;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpVersion;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.params.ConnManagerPNames;
-import org.apache.http.conn.params.ConnPerRouteBean;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.SingleClientConnManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import android.app.Activity;
@@ -43,7 +15,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
@@ -110,16 +81,6 @@ public class CokeRewardsActivity extends Activity {
 	public static final String MESSAGES = "messagesResult";
 
 	/**
-	 * URL to POST requests to
-	 */
-	private static final String URL = "http://www.mycokerewards.com/xmlrpc";
-
-	/**
-	 * Secure URL to POST requests to
-	 */
-	private static final String SECURE_URL = "https://www.mycokerewards.com/xmlrpc";
-
-	/**
 	 * Request code for starting our RegisterActivity
 	 */
 	private static final int REGISTER_REQUEST_CODE = 1000;
@@ -128,11 +89,6 @@ public class CokeRewardsActivity extends Activity {
 	 * Handler to use for the threads
 	 */
 	private static Handler handler = new Handler();
-
-	/**
-	 * The request response
-	 */
-	private static String mResult;
 
 	/**
 	 * Google Analytics tracker
@@ -273,11 +229,13 @@ public class CokeRewardsActivity extends Activity {
 						try {
 							tracker.trackEvent("Button", "SubmitCode", "Submit Code button clicked", 0);
 							try {
-								getData(CokeRewardsActivity.this, CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, finalCode), codeUpdateRunnable, true);
+								Map<String, Object> result = CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, finalCode);
+								parseResult(CokeRewardsActivity.this, codeUpdateRunnable, result);
 							} catch (Exception e) {
 								tracker.trackEvent("Exception", "ExceptionSecureSubmitCode", "Submit Code encountered an exception: " + e.getMessage(), 0);
 								e.printStackTrace();
-								getData(CokeRewardsActivity.this, CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, finalCode), codeUpdateRunnable, false);
+								Map<String, Object> result = CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, finalCode);
+								parseResult(CokeRewardsActivity.this, codeUpdateRunnable, result);
 							}
 						} catch (Exception e) {
 							tracker.trackEvent("Exception", "ExceptionSubmitCode", "Submit Code encountered an exception: " + e.getMessage(), 0);
@@ -319,7 +277,9 @@ public class CokeRewardsActivity extends Activity {
 	protected void onResume() {
 		super.onResume();
 
-		getNumberOfPoints();
+		if (isLoggedIn()) {
+			getNumberOfPoints();
+		}
 	}
 
 	/**
@@ -332,11 +292,13 @@ public class CokeRewardsActivity extends Activity {
 				try {
 					tracker.trackEvent("CountFetch", "CountFetch", "Fetched number of points", 0);
 					try {
-						getData(CokeRewardsActivity.this, CokeRewardsRequest.createLoginRequestBody(CokeRewardsActivity.this), updateUIRunnable, true);
+						Map<String, Object> result = CokeRewardsRequest.createLoginRequestBody(CokeRewardsActivity.this);
+						parseResult(CokeRewardsActivity.this, updateUIRunnable, result);
 					} catch (Exception e) {
 						tracker.trackEvent("Exception", "ExceptionSecureGetNumPoints", "Get number of points encountered an exception: " + e.getMessage(), 0);
 						e.printStackTrace();
-						getData(CokeRewardsActivity.this, CokeRewardsRequest.createLoginRequestBody(CokeRewardsActivity.this), updateUIRunnable, false);
+						Map<String, Object> result = CokeRewardsRequest.createLoginRequestBody(CokeRewardsActivity.this);
+						parseResult(CokeRewardsActivity.this, updateUIRunnable, result);
 					}
 				} catch (Exception e) {
 					tracker.trackEvent("Exception", "ExceptionGetNumPoints", "Get number of points encountered an exception: " + e.getMessage(), 0);
@@ -405,124 +367,50 @@ public class CokeRewardsActivity extends Activity {
 	}
 
 	/**
-	 * Create an HTTPClient that supports HTTP and HTTPS.
-	 * 
-	 * @return the HTTPClient
-	 */
-	private static HttpClient createHttpClient() {
-		SchemeRegistry schemeRegistry = new SchemeRegistry();
-		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-		schemeRegistry.register(new Scheme("https", new EasySSLSocketFactory(), 443));
-
-		HttpParams params = new BasicHttpParams();
-		params.setParameter(ConnManagerPNames.MAX_TOTAL_CONNECTIONS, 30);
-		params.setParameter(ConnManagerPNames.MAX_CONNECTIONS_PER_ROUTE, new ConnPerRouteBean(30));
-		params.setParameter(HttpProtocolParams.USE_EXPECT_CONTINUE, false);
-		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-
-		ClientConnectionManager cm = new SingleClientConnManager(params, schemeRegistry);
-		return new DefaultHttpClient(cm, params);
-	}
-
-
-	/**
 	 * Make a server request and update preferences accordingly.
 	 * 
 	 * @param postValue The value to POST to the server
-	 * @param mRunnable The Runnable to start after we are done processing
+	 * @param runnable The Runnable to start after we are done processing
 	 * @throws IOException
 	 * @throws XPathExpressionException
 	 * @throws SAXException
 	 * @throws ParserConfigurationException
 	 */
-	public static void getData(Context ctx, String postValue, Runnable mRunnable, boolean isSecure) throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
-		HttpClient httpClient = createHttpClient();
-		HttpPost httppost;
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-			httppost = new HttpPost(isSecure ? SECURE_URL : URL);
-		} else {
-			httppost = new HttpPost(URL);
-		}
-
-		StringEntity se = new StringEntity(postValue);
-		se.setContentType("text/xml");
-		httppost.setEntity(se);
-
-		HttpResponse response = httpClient.execute(httppost);
-
-		InputStream input = response.getEntity().getContent();
-
-		mResult = readStreamAsString(input);
-
-		DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-		builderFactory.setNamespaceAware(true);
-		DocumentBuilder builder = builderFactory.newDocumentBuilder();
-		Document document = builder.parse(new InputSource(new StringReader(mResult)));
-		XPath xpath = XPathFactory.newInstance().newXPath();
-
+	public static void parseResult(Context ctx, Runnable runnable, Map<String, Object> data) throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
 		SharedPreferences prefs = ctx.getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_WRITEABLE);
 		Editor edit = prefs.edit();
 
-		Double points = (Double) xpath.evaluate("/methodResponse//member/value[../name/text()='POINTS']//text()", document, XPathConstants.NUMBER);
-		if (points != null) {
-			edit.putInt(POINTS, points.intValue());
+		if (data.containsKey("POINTS")) {
+			edit.putInt(POINTS, (Integer) data.get("POINTS"));
 		}
 
-		NodeList loggedIn = (NodeList) xpath.evaluate("/methodResponse//member/value[../name/text()='LOGIN_RESULT']", document, XPathConstants.NODESET);
-		for (int i = 0; i < loggedIn.getLength(); i++) {
-			Node n = loggedIn.item(i);
-			edit.putBoolean(LOGGED_IN, Boolean.parseBoolean(n.getTextContent()));
+		if (data.containsKey("LOGIN_RESULT")) {
+			edit.putBoolean(LOGGED_IN, Boolean.parseBoolean((String) data.get("LOGIN_RESULT")));
 		}
 
-		String screenName = (String) xpath.evaluate("/methodResponse//member/value[../name/text()='SCREEN_NAME']//text()", document, XPathConstants.STRING);
-		if (!"".equals(screenName)) {
-			edit.putString(SCREEN_NAME, screenName);
+		if (data.containsKey("SCREEN_NAME")) {
+			String screenName = (String) data.get("SCREEN_NAME");
+
+			if (screenName != null && !"".equals(screenName)) {
+				edit.putString(SCREEN_NAME, screenName);
+			}
 		}
 
-		NodeList codeResult = (NodeList) xpath.evaluate("/methodResponse//member/value[../name/text()='ENTER_CODE_RESULT']", document, XPathConstants.NODESET);
-		for (int i = 0; i < codeResult.getLength(); i++) {
-			Node n = codeResult.item(i);
-			edit.putBoolean(ENTER_CODE_RESULT, Boolean.parseBoolean(n.getTextContent()));
+		if (data.containsKey("ENTER_CODE_RESULT")) {
+			edit.putBoolean(ENTER_CODE_RESULT, Boolean.parseBoolean((String) data.get("ENTER_CODE_RESULT")));
 		}
 
-		Double pointsEarned = (Double) xpath.evaluate("/methodResponse//member/value[../name/text()='POINTS_EARNED']//text()", document, XPathConstants.NUMBER);
-		edit.putInt(POINTS_EARNED_RESULT, (pointsEarned != null) ? pointsEarned.intValue() : 0);
+		if (data.containsKey("POINTS_EARNED")) {
+			edit.putInt(POINTS_EARNED_RESULT, (Integer) data.get("POINTS_EARNED"));
+		}
 
-		NodeList nodes = (NodeList) xpath.evaluate("/methodResponse//member/value[../name/text()='MESSAGES']", document, XPathConstants.NODESET);
-
-		for (int i = 0; i < nodes.getLength(); i++) {
-			Node n = nodes.item(i);
-			edit.putString(MESSAGES, n.getTextContent());
+		if (data.containsKey("MESSAGES")) {
+			String messages = (String) ((Object[]) data.get("MESSAGES"))[0];
+			edit.putString(MESSAGES, messages);
 		}
 
 		edit.commit();
 
-		handler.post(mRunnable);
-	}
-
-	/**
-	 * Reads an entire input stream as a String. Closes the input stream.
-	 */
-	public static String readStreamAsString(InputStream in) {
-		try {
-			ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
-			byte[] buffer = new byte[1024];
-			int count;
-			do {
-				count = in.read(buffer);
-				if (count > 0) {
-					out.write(buffer, 0, count);
-				}
-			} while (count >= 0);
-			return out.toString("UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException("The JVM does not support the compiler's default encoding.", e);
-		} catch (IOException e) {
-			return null;
-		} finally {
-			try {
-				in.close();
-			} catch (IOException ignored) {	}
-		}
+		handler.post(runnable);
 	}
 }

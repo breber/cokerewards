@@ -1,5 +1,7 @@
 package com.brianreber.cokerewards;
 
+import java.util.Map;
+
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -131,15 +133,13 @@ public class RegisterActivity extends Activity {
 				try {
 					tracker.trackEvent("Logon", "Logon", "Logging on", 0);
 					try {
-						CokeRewardsActivity.getData(RegisterActivity.this,
-								CokeRewardsRequest.createLoginRequestBody(RegisterActivity.this),
-								updateUIRunnable, true);
+						Map<String, Object> result = CokeRewardsRequest.createLoginRequestBody(RegisterActivity.this);
+						CokeRewardsActivity.parseResult(RegisterActivity.this, updateUIRunnable, result);
 					} catch (Exception e) {
 						tracker.trackEvent("Exception", "ExceptionSecureLogon", "Exception when trying to log on: " + e.getMessage(), 0);
 
-						CokeRewardsActivity.getData(RegisterActivity.this,
-								CokeRewardsRequest.createLoginRequestBody(RegisterActivity.this),
-								updateUIRunnable, false);
+						Map<String, Object> result = CokeRewardsRequest.createLoginRequestBody(RegisterActivity.this);
+						CokeRewardsActivity.parseResult(RegisterActivity.this, updateUIRunnable, result);
 					}
 				} catch (Exception e) {
 					tracker.trackEvent("Exception", "ExceptionLogon", "Exception when trying to log on: " + e.getMessage(), 0);
