@@ -31,7 +31,7 @@ public class CokeRewardsRequest {
 	 */
 	@SuppressWarnings("unchecked")
 	public static Map<String, Object> createLoginRequestBody(Context ctx) {
-		SharedPreferences prefs = ctx.getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, Context.MODE_WORLD_READABLE);
+		SharedPreferences prefs = ctx.getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, 0);
 
 		String emailAddress = prefs.getString(CokeRewardsActivity.EMAIL_ADDRESS, "");
 		String password = prefs.getString(CokeRewardsActivity.PASSWORD, "");
@@ -66,7 +66,7 @@ public class CokeRewardsRequest {
 	 */
 	@SuppressWarnings("unchecked")
 	public static Map<String, Object> createCodeRequestBody(Context ctx, String code) {
-		SharedPreferences prefs = ctx.getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, Context.MODE_WORLD_READABLE);
+		SharedPreferences prefs = ctx.getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, 0);
 
 		String emailAddress = prefs.getString(CokeRewardsActivity.EMAIL_ADDRESS, "");
 		String password = prefs.getString(CokeRewardsActivity.PASSWORD, "");

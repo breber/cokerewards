@@ -107,7 +107,7 @@ public class CokeRewardsActivity extends Activity {
 	private Runnable updateUIRunnable = new Runnable() {
 		@Override
 		public void run() {
-			SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
+			SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, 0);
 
 			if (dlg != null && dlg.isShowing()) {
 				dlg.dismiss();
@@ -131,7 +131,7 @@ public class CokeRewardsActivity extends Activity {
 	private Runnable codeUpdateRunnable = new Runnable() {
 		@Override
 		public void run() {
-			SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
+			SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, 0);
 
 			if (dlg != null && dlg.isShowing()) {
 				dlg.dismiss();
@@ -188,7 +188,7 @@ public class CokeRewardsActivity extends Activity {
 		dlg.setCancelable(false);
 		dlg.setMessage(getResources().getText(R.string.submitting));
 
-		SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
+		SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, 0);
 		TextView tv = (TextView) findViewById(R.id.numPoints);
 
 		try {
@@ -326,7 +326,7 @@ public class CokeRewardsActivity extends Activity {
 	 * logged in with the most recent request
 	 */
 	public static boolean isLoggedIn(Context ctx) {
-		SharedPreferences prefs = ctx.getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_READABLE);
+		SharedPreferences prefs = ctx.getSharedPreferences(COKE_REWARDS, 0);
 		return prefs.contains(EMAIL_ADDRESS) && prefs.contains(PASSWORD) && prefs.getBoolean(LOGGED_IN, false);
 	}
 
@@ -335,7 +335,7 @@ public class CokeRewardsActivity extends Activity {
 		int menuId = item.getItemId();
 
 		if (menuId == R.id.logout) {
-			SharedPreferences prefs = getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, Context.MODE_WORLD_WRITEABLE);
+			SharedPreferences prefs = getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, 0);
 			Editor edit = prefs.edit();
 
 			edit.clear();
@@ -377,7 +377,7 @@ public class CokeRewardsActivity extends Activity {
 	 * @throws ParserConfigurationException
 	 */
 	public static void parseResult(Context ctx, Runnable runnable, Map<String, Object> data) throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
-		SharedPreferences prefs = ctx.getSharedPreferences(COKE_REWARDS, Context.MODE_WORLD_WRITEABLE);
+		SharedPreferences prefs = ctx.getSharedPreferences(COKE_REWARDS, 0);
 		Editor edit = prefs.edit();
 
 		if (data.containsKey("POINTS")) {

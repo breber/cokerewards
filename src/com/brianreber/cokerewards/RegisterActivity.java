@@ -4,7 +4,6 @@ import java.util.Map;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
@@ -49,7 +48,7 @@ public class RegisterActivity extends Activity {
 			if (CokeRewardsActivity.isLoggedIn(RegisterActivity.this)) {
 				RegisterActivity.this.finish();
 			} else {
-				SharedPreferences prefs = getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, Context.MODE_WORLD_WRITEABLE);
+				SharedPreferences prefs = getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, 0);
 				Editor edit = prefs.edit();
 
 				edit.remove(CokeRewardsActivity.EMAIL_ADDRESS);
@@ -120,7 +119,7 @@ public class RegisterActivity extends Activity {
 			return;
 		}
 
-		SharedPreferences prefs = getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, Context.MODE_WORLD_WRITEABLE);
+		SharedPreferences prefs = getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, 0);
 		Editor edit = prefs.edit();
 
 		edit.putString(CokeRewardsActivity.EMAIL_ADDRESS, emailAddress);
