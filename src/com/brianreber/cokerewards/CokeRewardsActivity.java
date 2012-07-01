@@ -1,12 +1,6 @@
 package com.brianreber.cokerewards;
 
-import java.io.IOException;
 import java.util.Map;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
-import org.xml.sax.SAXException;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -386,12 +380,8 @@ public class CokeRewardsActivity extends Activity {
 	 * 
 	 * @param postValue The value to POST to the server
 	 * @param runnable The Runnable to start after we are done processing
-	 * @throws IOException
-	 * @throws XPathExpressionException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
 	 */
-	public static void parseResult(Context ctx, Runnable runnable, Map<String, Object> data) throws IOException, XPathExpressionException, SAXException, ParserConfigurationException {
+	public static void parseResult(Context ctx, Runnable runnable, Map<String, Object> data) {
 		SharedPreferences prefs = ctx.getSharedPreferences(COKE_REWARDS, 0);
 		Editor edit = prefs.edit();
 
