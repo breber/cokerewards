@@ -141,7 +141,10 @@ public class RegisterActivity extends Activity {
 						CokeRewardsActivity.parseResult(RegisterActivity.this, updateUIRunnable, result);
 					}
 				} catch (Exception e) {
-					tracker.trackEvent("Exception", "ExceptionLogon", "Exception when trying to log on: " + e.getMessage(), 0);
+					try {
+						tracker.trackEvent("Exception", "ExceptionLogon", "Exception when trying to log on: " + e.getMessage(), 0);
+					} catch (Exception ex) { }
+
 					e.printStackTrace();
 
 					mHandler.post(errorRunnable);

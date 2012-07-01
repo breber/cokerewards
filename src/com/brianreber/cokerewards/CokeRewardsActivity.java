@@ -143,12 +143,17 @@ public class CokeRewardsActivity extends Activity {
 
 				int numPointsEarned = prefs.getInt(POINTS_EARNED_RESULT, 0);
 				Toast.makeText(getApplicationContext(), "Code submitted successfully. " + numPointsEarned + " points earned!", Toast.LENGTH_SHORT).show();
-				tracker.trackEvent("SuccessfulCode", "SuccessfulCode", "SuccessfulCodeSubmission", 0);
+
+				try {
+					tracker.trackEvent("SuccessfulCode", "SuccessfulCode", "SuccessfulCodeSubmission", 0);
+				} catch (Exception e) { }
 			} else {
 				String messages = prefs.getString(MESSAGES, "");
 				Toast.makeText(getApplicationContext(), "Code submission failed..." + messages, Toast.LENGTH_SHORT).show();
 
-				tracker.trackEvent("FailedCode", "FailedCode", "Code submission failed: " + messages, 0);
+				try {
+					tracker.trackEvent("FailedCode", "FailedCode", "Code submission failed: " + messages, 0);
+				} catch (Exception e) { }
 			}
 
 			getNumberOfPoints();
@@ -234,11 +239,15 @@ public class CokeRewardsActivity extends Activity {
 							} catch (Exception e) {
 								tracker.trackEvent("Exception", "ExceptionSecureSubmitCode", "Submit Code encountered an exception: " + e.getMessage(), 0);
 								e.printStackTrace();
+
 								Map<String, Object> result = CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, finalCode);
 								parseResult(CokeRewardsActivity.this, codeUpdateRunnable, result);
 							}
 						} catch (Exception e) {
-							tracker.trackEvent("Exception", "ExceptionSubmitCode", "Submit Code encountered an exception: " + e.getMessage(), 0);
+							try {
+								tracker.trackEvent("Exception", "ExceptionSubmitCode", "Submit Code encountered an exception: " + e.getMessage(), 0);
+							} catch (Exception ex) { }
+
 							handler.post(errorRunnable);
 							e.printStackTrace();
 						}
@@ -267,8 +276,10 @@ public class CokeRewardsActivity extends Activity {
 
 	@Override
 	public void onDestroy() {
-		// Stop the tracker when it is no longer needed.
-		tracker.stopSession();
+		try {
+			// Stop the tracker when it is no longer needed.
+			tracker.stopSession();
+		} catch (Exception e) { }
 
 		super.onDestroy();
 	}
@@ -297,11 +308,15 @@ public class CokeRewardsActivity extends Activity {
 					} catch (Exception e) {
 						tracker.trackEvent("Exception", "ExceptionSecureGetNumPoints", "Get number of points encountered an exception: " + e.getMessage(), 0);
 						e.printStackTrace();
+
 						Map<String, Object> result = CokeRewardsRequest.createLoginRequestBody(CokeRewardsActivity.this);
 						parseResult(CokeRewardsActivity.this, updateUIRunnable, result);
 					}
 				} catch (Exception e) {
-					tracker.trackEvent("Exception", "ExceptionGetNumPoints", "Get number of points encountered an exception: " + e.getMessage(), 0);
+					try {
+						tracker.trackEvent("Exception", "ExceptionGetNumPoints", "Get number of points encountered an exception: " + e.getMessage(), 0);
+					} catch (Exception ex) { }
+
 					handler.post(errorRunnable);
 					e.printStackTrace();
 				}
