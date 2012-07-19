@@ -5,6 +5,7 @@
     android:layout_height="wrap_content" >
 
     <LinearLayout
+        android:id="@+id/linearLayout1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
@@ -64,5 +65,13 @@
         ads:loadAdOnCreate="true"
         ads:testDevices="TEST_EMULATOR"
         android:gravity="center_horizontal" />
+
+    <Button
+        android:id="@+id/ocrButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/linearLayout1"
+        android:layout_centerHorizontal="true"
+        android:text="OCR" />
 
 </RelativeLayout>

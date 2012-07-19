@@ -21,7 +21,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.brianreber.cokerewards.ocr.CaptureActivity;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+
 
 /**
  * Main activity for the app
@@ -78,6 +80,11 @@ public class CokeRewardsActivity extends Activity {
 	 * Request code for starting our RegisterActivity
 	 */
 	private static final int REGISTER_REQUEST_CODE = 1000;
+
+	/**
+	 * Request code for starting our CaptureActivity
+	 */
+	private static final int OCR_REQUEST_CODE = 1001;
 
 	/**
 	 * Handler to use for the threads
@@ -260,6 +267,15 @@ public class CokeRewardsActivity extends Activity {
 			}
 		});
 
+		Button ocrButton = (Button) findViewById(R.id.ocrButton);
+		ocrButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent i = new Intent(CokeRewardsActivity.this, CaptureActivity.class);
+				startActivityForResult(i, OCR_REQUEST_CODE);
+			}
+		});
+
 		if (isLoggedIn()) {
 			getNumberOfPoints();
 		} else {
@@ -372,6 +388,12 @@ public class CokeRewardsActivity extends Activity {
 			getNumberOfPoints();
 		} else {
 			finish();
+		}
+
+		if (OCR_REQUEST_CODE == requestCode) {
+			String result = data.getStringExtra("result");
+			EditText tv = (EditText) findViewById(R.id.code);
+			tv.setText(result);
 		}
 	}
 
