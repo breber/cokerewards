@@ -24,31 +24,24 @@ import java.io.IOException;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.text.ClipboardManager;
 import android.text.SpannableStringBuilder;
 import android.text.style.CharacterStyle;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -61,7 +54,6 @@ import android.widget.Toast;
 import com.brianreber.cokerewards.R;
 import com.brianreber.cokerewards.ocr.camera.CameraManager;
 import com.brianreber.cokerewards.ocr.camera.ShutterButton;
-import com.brianreber.cokerewards.ocr.language.LanguageCodeHelper;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
 /**
@@ -121,18 +113,6 @@ ShutterButton.OnShutterButtonListener {
 	/** Flag to enable display of the on-screen shutter button. */
 	private static final boolean DISPLAY_SHUTTER_BUTTON = true;
 
-	/** Languages for which Cube data is available. */
-	static final String[] CUBE_SUPPORTED_LANGUAGES = {
-		"ara", // Arabic
-		"eng", // English
-		"hin" // Hindi
-	};
-
-	/** Languages that require Cube, and cannot run using Tesseract. */
-	private static final String[] CUBE_REQUIRED_LANGUAGES = {
-		"ara" // Arabic
-	};
-
 	/** Resource to use for data file downloads. */
 	static final String DOWNLOAD_BASE = "http://tesseract-ocr.googlecode.com/files/";
 
@@ -145,16 +125,6 @@ ShutterButton.OnShutterButtonListener {
 	/** Minimum mean confidence score necessary to not reject single-shot OCR result. Currently unused. */
 	static final int MINIMUM_MEAN_CONFIDENCE = 0; // 0 means don't reject any scored results
 
-	// Context menu
-	private static final int SETTINGS_ID = Menu.FIRST;
-	private static final int ABOUT_ID = Menu.FIRST + 1;
-
-	// Options menu, for copy to clipboard
-	private static final int OPTIONS_COPY_RECOGNIZED_TEXT_ID = Menu.FIRST;
-	private static final int OPTIONS_COPY_TRANSLATED_TEXT_ID = Menu.FIRST + 1;
-	private static final int OPTIONS_SHARE_RECOGNIZED_TEXT_ID = Menu.FIRST + 2;
-	private static final int OPTIONS_SHARE_TRANSLATED_TEXT_ID = Menu.FIRST + 3;
-
 	private CameraManager cameraManager;
 	private CaptureActivityHandler handler;
 	private ViewfinderView viewfinderView;
@@ -162,35 +132,21 @@ ShutterButton.OnShutterButtonListener {
 	private SurfaceHolder surfaceHolder;
 	private TextView statusViewBottom;
 	private TextView statusViewTop;
-	private TextView ocrResultView;
-	private TextView translationView;
 	private View cameraButtonView;
-	private View resultView;
-	private View progressView;
 	private OcrResult lastResult;
-	private Bitmap lastBitmap;
 	private boolean hasSurface;
-	private BeepManager beepManager;
 	private TessBaseAPI baseApi; // Java interface for the Tesseract OCR engine
-	private String sourceLanguageCodeOcr; // ISO 639-3 language code
-	private String sourceLanguageReadable; // Language name, for example, "English"
-	private String sourceLanguageCodeTranslation; // ISO 639-1 language code
-	private String targetLanguageCodeTranslation; // ISO 639-1 language code
-	private String targetLanguageReadable; // Language name, for example, "English"
+	private String sourceLanguageCodeOcr = "eng"; // ISO 639-3 language code
+	private String sourceLanguageReadable = "English"; // Language name, for example, "English"
 	private int pageSegmentationMode = TessBaseAPI.PSM_AUTO;
 	private int ocrEngineMode = TessBaseAPI.OEM_TESSERACT_ONLY;
-	private String characterBlacklist;
-	private String characterWhitelist;
 	private ShutterButton shutterButton;
 	//  private ToggleButton torchButton;
-	private boolean isTranslationActive; // Whether we want to show translations
-	private boolean isContinuousModeActive; // Whether we are doing OCR in continuous mode
 	private SharedPreferences prefs;
 	private OnSharedPreferenceChangeListener listener;
 	private ProgressDialog dialog; // for initOcr - language download & unzip
 	private ProgressDialog indeterminateDialog; // also for initOcr - init OCR engine
 	private boolean isEngineReady;
-	private boolean isPaused;
 	private static boolean isFirstLaunch; // True if this is the first time the app is being run
 
 	Handler getHandler() {
@@ -211,17 +167,12 @@ ShutterButton.OnShutterButtonListener {
 
 		checkFirstLaunch();
 
-		if (isFirstLaunch) {
-			setDefaultPreferences();
-		}
-
 		Window window = getWindow();
 		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.capture);
 		viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_view);
 		cameraButtonView = findViewById(R.id.camera_button_view);
-		resultView = findViewById(R.id.result_view);
 
 		statusViewBottom = (TextView) findViewById(R.id.status_view_bottom);
 		registerForContextMenu(statusViewBottom);
@@ -231,20 +182,12 @@ ShutterButton.OnShutterButtonListener {
 		handler = null;
 		lastResult = null;
 		hasSurface = false;
-		beepManager = new BeepManager(this);
 
 		// Camera shutter button
 		if (DISPLAY_SHUTTER_BUTTON) {
 			shutterButton = (ShutterButton) findViewById(R.id.shutter_button);
 			shutterButton.setOnShutterButtonListener(this);
 		}
-
-		ocrResultView = (TextView) findViewById(R.id.ocr_result_text_view);
-		registerForContextMenu(ocrResultView);
-		translationView = (TextView) findViewById(R.id.translation_text_view);
-		registerForContextMenu(translationView);
-
-		progressView = findViewById(R.id.indeterminate_progress_indicator_view);
 
 		cameraManager = new CameraManager(getApplication());
 		viewfinderView.setCameraManager(cameraManager);
@@ -380,49 +323,19 @@ ShutterButton.OnShutterButtonListener {
 		// isEngineReady = true here.
 		isEngineReady = true;
 
-		isPaused = false;
-
 		if (handler != null) {
 			handler.resetState();
 		}
 		if (baseApi != null) {
 			baseApi.setPageSegMode(pageSegmentationMode);
-			baseApi.setVariable(TessBaseAPI.VAR_CHAR_BLACKLIST, characterBlacklist);
-			baseApi.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, characterWhitelist);
+			baseApi.setVariable(TessBaseAPI.VAR_CHAR_BLACKLIST, OcrCharacterHelper.getBlacklist());
+			baseApi.setVariable(TessBaseAPI.VAR_CHAR_WHITELIST, OcrCharacterHelper.getWhitelist());
 		}
 
 		if (hasSurface) {
 			// The activity was paused but not stopped, so the surface still exists. Therefore
 			// surfaceCreated() won't be called, so init the camera here.
 			initCamera(surfaceHolder);
-		}
-	}
-
-	/** Called when the shutter button is pressed in continuous mode. */
-	void onShutterButtonPressContinuous() {
-		isPaused = true;
-		handler.stop();
-		beepManager.playBeepSoundAndVibrate();
-		if (lastResult != null) {
-			handleOcrDecode(lastResult);
-		} else {
-			Toast toast = Toast.makeText(this, "OCR failed. Please try again.", Toast.LENGTH_SHORT);
-			toast.setGravity(Gravity.TOP, 0, 0);
-			toast.show();
-			resumeContinuousDecoding();
-		}
-	}
-
-	/** Called to resume recognition after translation in continuous mode. */
-	@SuppressWarnings("unused")
-	void resumeContinuousDecoding() {
-		isPaused = false;
-		resetStatusView();
-		setStatusViewForContinuous();
-		DecodeHandler.resetDecodeState();
-		handler.resetState();
-		if (shutterButton != null && DISPLAY_SHUTTER_BUTTON) {
-			shutterButton.setVisibility(View.VISIBLE);
 		}
 	}
 
@@ -454,7 +367,7 @@ ShutterButton.OnShutterButtonListener {
 			cameraManager.openDriver(surfaceHolder);
 
 			// Creating the handler starts the preview, which can also throw a RuntimeException.
-			handler = new CaptureActivityHandler(this, cameraManager, isContinuousModeActive);
+			handler = new CaptureActivityHandler(this, cameraManager);
 
 		} catch (IOException ioe) {
 			showErrorMessage("Error", "Could not initialize camera. Please try restarting device.");
@@ -500,13 +413,6 @@ ShutterButton.OnShutterButtonListener {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 
-			// First check if we're paused in continuous mode, and if so, just unpause.
-			if (isPaused) {
-				Log.d(TAG, "only resuming continuous recognition, not quitting...");
-				resumeContinuousDecoding();
-				return true;
-			}
-
 			// Exit the app if we're not viewing an OCR result.
 			if (lastResult == null) {
 				setResult(RESULT_CANCELED);
@@ -521,11 +427,7 @@ ShutterButton.OnShutterButtonListener {
 				return true;
 			}
 		} else if (keyCode == KeyEvent.KEYCODE_CAMERA) {
-			if (isContinuousModeActive) {
-				onShutterButtonPressContinuous();
-			} else {
-				handler.hardwareShutterButtonClick();
-			}
+			handler.hardwareShutterButtonClick();
 			return true;
 		} else if (keyCode == KeyEvent.KEYCODE_FOCUS) {
 			// Only perform autofocus if user is not holding down the button.
@@ -538,35 +440,6 @@ ShutterButton.OnShutterButtonListener {
 	}
 
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		//    MenuInflater inflater = getMenuInflater();
-		//    inflater.inflate(R.menu.options_menu, menu);
-		super.onCreateOptionsMenu(menu);
-		menu.add(0, SETTINGS_ID, 0, "Settings").setIcon(android.R.drawable.ic_menu_preferences);
-		menu.add(0, ABOUT_ID, 0, "About").setIcon(android.R.drawable.ic_menu_info_details);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		Intent intent;
-		switch (item.getItemId()) {
-		case SETTINGS_ID: {
-			intent = new Intent().setClass(this, PreferencesActivity.class);
-			startActivity(intent);
-			break;
-		}
-		case ABOUT_ID: {
-			intent = new Intent(this, HelpActivity.class);
-			intent.putExtra(HelpActivity.REQUESTED_PAGE_KEY, HelpActivity.ABOUT_PAGE);
-			startActivity(intent);
-			break;
-		}
-		}
-		return super.onOptionsItemSelected(item);
-	}
-
-	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		hasSurface = false;
 	}
@@ -575,25 +448,8 @@ ShutterButton.OnShutterButtonListener {
 	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 	}
 
-	/** Sets the necessary language code values for the given OCR language. */
-	private boolean setSourceLanguage(String languageCode) {
-		sourceLanguageCodeOcr = languageCode;
-		sourceLanguageCodeTranslation = LanguageCodeHelper.mapLanguageCode(languageCode);
-		sourceLanguageReadable = LanguageCodeHelper.getOcrLanguageName(this, languageCode);
-		return true;
-	}
-
-	/** Sets the necessary language code values for the translation target language. */
-	private boolean setTargetLanguage(String languageCode) {
-		targetLanguageCodeTranslation = languageCode;
-		targetLanguageReadable = LanguageCodeHelper.getTranslationLanguageName(this, languageCode);
-		return true;
-	}
-
 	/** Finds the proper location on the SD card where we can save files. */
 	private File getStorageDirectory() {
-		//Log.d(TAG, "getStorageDirectory(): API level is " + Integer.valueOf(android.os.Build.VERSION.SDK_INT));
-
 		String state = null;
 		try {
 			state = Environment.getExternalStorageState();
@@ -603,11 +459,6 @@ ShutterButton.OnShutterButtonListener {
 		}
 
 		if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-
-			// We can read and write the media
-			//    	if (Integer.valueOf(android.os.Build.VERSION.SDK_INT) > 7) {
-			// For Android 2.2 and above
-
 			try {
 				return getExternalFilesDir(Environment.MEDIA_MOUNTED);
 			} catch (NullPointerException e) {
@@ -615,15 +466,6 @@ ShutterButton.OnShutterButtonListener {
 				Log.e(TAG, "External storage is unavailable");
 				showErrorMessage("Error", "Required external storage (such as an SD card) is full or unavailable.");
 			}
-
-			//        } else {
-			//          // For Android 2.1 and below, explicitly give the path as, for example,
-			//          // "/mnt/sdcard/Android/data/edu.sfsu.cs.orange.ocr/files/"
-			//          return new File(Environment.getExternalStorageDirectory().toString() + File.separator +
-			//                  "Android" + File.separator + "data" + File.separator + getPackageName() +
-			//                  File.separator + "files" + File.separator);
-			//        }
-
 		} else if (Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
 			// We can only read the media
 			Log.e(TAG, "External storage is read-only");
@@ -652,56 +494,17 @@ ShutterButton.OnShutterButtonListener {
 			dialog.dismiss();
 		}
 		dialog = new ProgressDialog(this);
-
-		// If we have a language that only runs using Cube, then set the ocrEngineMode to Cube
-		if (ocrEngineMode != TessBaseAPI.OEM_CUBE_ONLY) {
-			for (String s : CUBE_REQUIRED_LANGUAGES) {
-				if (s.equals(languageCode)) {
-					ocrEngineMode = TessBaseAPI.OEM_CUBE_ONLY;
-					SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-					prefs.edit().putString(PreferencesActivity.KEY_OCR_ENGINE_MODE, getOcrEngineModeName()).commit();
-				}
-			}
-		}
-
-		// If our language doesn't support Cube, then set the ocrEngineMode to Tesseract
-		if (ocrEngineMode != TessBaseAPI.OEM_TESSERACT_ONLY) {
-			boolean cubeOk = false;
-			for (String s : CUBE_SUPPORTED_LANGUAGES) {
-				if (s.equals(languageCode)) {
-					cubeOk = true;
-				}
-			}
-			if (!cubeOk) {
-				ocrEngineMode = TessBaseAPI.OEM_TESSERACT_ONLY;
-				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-				prefs.edit().putString(PreferencesActivity.KEY_OCR_ENGINE_MODE, getOcrEngineModeName()).commit();
-			}
-		}
+		ocrEngineMode = TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED;
 
 		// Display the name of the OCR engine we're initializing in the indeterminate progress dialog box
 		indeterminateDialog = new ProgressDialog(this);
 		indeterminateDialog.setTitle("Please wait");
-		String ocrEngineModeName = getOcrEngineModeName();
-		if (ocrEngineModeName.equals("Both")) {
-			indeterminateDialog.setMessage("Initializing Cube and Tesseract OCR engines for " + languageName + "...");
-		} else {
-			indeterminateDialog.setMessage("Initializing " + ocrEngineModeName + " OCR engine for " + languageName + "...");
-		}
+		indeterminateDialog.setMessage("Initializing Cube and Tesseract OCR engines for " + languageName + "...");
 		indeterminateDialog.setCancelable(false);
 		indeterminateDialog.show();
 
 		if (handler != null) {
 			handler.quitSynchronously();
-		}
-
-		// Disable continuous mode if we're using Cube. This will prevent bad states for devices
-		// with low memory that crash when running OCR with Cube, and prevent unwanted delays.
-		if (ocrEngineMode == TessBaseAPI.OEM_CUBE_ONLY || ocrEngineMode == TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED) {
-			Log.d(TAG, "Disabling continuous preview");
-			isContinuousModeActive = false;
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-			prefs.edit().putBoolean(PreferencesActivity.KEY_CONTINUOUS_PREVIEW, false);
 		}
 
 		// Start AsyncTask to install language data and init OCR
@@ -827,62 +630,10 @@ ShutterButton.OnShutterButtonListener {
 		return text;
 	}
 
-	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v,
-			ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
-		if (v.equals(ocrResultView)) {
-			menu.add(Menu.NONE, OPTIONS_COPY_RECOGNIZED_TEXT_ID, Menu.NONE, "Copy recognized text");
-			menu.add(Menu.NONE, OPTIONS_SHARE_RECOGNIZED_TEXT_ID, Menu.NONE, "Share recognized text");
-		} else if (v.equals(translationView)){
-			menu.add(Menu.NONE, OPTIONS_COPY_TRANSLATED_TEXT_ID, Menu.NONE, "Copy translated text");
-			menu.add(Menu.NONE, OPTIONS_SHARE_TRANSLATED_TEXT_ID, Menu.NONE, "Share translated text");
-		}
-	}
-
-	@Override
-	public boolean onContextItemSelected(MenuItem item) {
-		ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-		switch (item.getItemId()) {
-
-		case OPTIONS_COPY_RECOGNIZED_TEXT_ID:
-			clipboardManager.setText(ocrResultView.getText());
-			if (clipboardManager.hasText()) {
-				Toast toast = Toast.makeText(this, "Text copied.", Toast.LENGTH_LONG);
-				toast.setGravity(Gravity.BOTTOM, 0, 0);
-				toast.show();
-			}
-			return true;
-		case OPTIONS_SHARE_RECOGNIZED_TEXT_ID:
-			Intent shareRecognizedTextIntent = new Intent(android.content.Intent.ACTION_SEND);
-			shareRecognizedTextIntent.setType("text/plain");
-			shareRecognizedTextIntent.putExtra(android.content.Intent.EXTRA_TEXT, ocrResultView.getText());
-			startActivity(Intent.createChooser(shareRecognizedTextIntent, "Share via"));
-			return true;
-		case OPTIONS_COPY_TRANSLATED_TEXT_ID:
-			clipboardManager.setText(translationView.getText());
-			if (clipboardManager.hasText()) {
-				Toast toast = Toast.makeText(this, "Text copied.", Toast.LENGTH_LONG);
-				toast.setGravity(Gravity.BOTTOM, 0, 0);
-				toast.show();
-			}
-			return true;
-		case OPTIONS_SHARE_TRANSLATED_TEXT_ID:
-			Intent shareTranslatedTextIntent = new Intent(android.content.Intent.ACTION_SEND);
-			shareTranslatedTextIntent.setType("text/plain");
-			shareTranslatedTextIntent.putExtra(android.content.Intent.EXTRA_TEXT, translationView.getText());
-			startActivity(Intent.createChooser(shareTranslatedTextIntent, "Share via"));
-			return true;
-		default:
-			return super.onContextItemSelected(item);
-		}
-	}
-
 	/**
 	 * Resets view elements.
 	 */
 	private void resetStatusView() {
-		resultView.setVisibility(View.GONE);
 		if (CONTINUOUS_DISPLAY_METADATA) {
 			statusViewBottom.setText("");
 			statusViewBottom.setTextSize(14);
@@ -921,7 +672,6 @@ ShutterButton.OnShutterButtonListener {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	void setButtonVisibility(boolean visible) {
 		if (shutterButton != null && visible == true && DISPLAY_SHUTTER_BUTTON) {
 			shutterButton.setVisibility(View.VISIBLE);
@@ -946,12 +696,8 @@ ShutterButton.OnShutterButtonListener {
 
 	@Override
 	public void onShutterButtonClick(ShutterButton b) {
-		if (isContinuousModeActive) {
-			onShutterButtonPressContinuous();
-		} else {
-			if (handler != null) {
-				handler.shutterButtonClick();
-			}
+		if (handler != null) {
+			handler.shutterButtonClick();
 		}
 	}
 
@@ -985,23 +731,16 @@ ShutterButton.OnShutterButtonListener {
 			PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
 			int currentVersion = info.versionCode;
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-			int lastVersion = prefs.getInt(PreferencesActivity.KEY_HELP_VERSION_SHOWN, 0);
+			int lastVersion = prefs.getInt("lastVersion", 0);
 			if (lastVersion == 0) {
 				isFirstLaunch = true;
 			} else {
 				isFirstLaunch = false;
 			}
 			if (currentVersion > lastVersion) {
-
 				// Record the last version for which we last displayed the What's New (Help) page
-				prefs.edit().putInt(PreferencesActivity.KEY_HELP_VERSION_SHOWN, currentVersion).commit();
-				Intent intent = new Intent(this, HelpActivity.class);
-				intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+				prefs.edit().putInt("lastVersion", currentVersion).commit();
 
-				// Show the default page on a clean install, and the what's new page on an upgrade.
-				String page = lastVersion == 0 ? HelpActivity.DEFAULT_PAGE : HelpActivity.WHATS_NEW_PAGE;
-				intent.putExtra(HelpActivity.REQUESTED_PAGE_KEY, page);
-				startActivity(intent);
 				return true;
 			}
 		} catch (PackageManager.NameNotFoundException e) {
@@ -1011,45 +750,14 @@ ShutterButton.OnShutterButtonListener {
 	}
 
 	/**
-	 * Returns a string that represents which OCR engine(s) are currently set to be run.
-	 * 
-	 * @return OCR engine mode
-	 */
-	String getOcrEngineModeName() {
-		String ocrEngineModeName = "";
-		String[] ocrEngineModes = getResources().getStringArray(R.array.ocrenginemodes);
-		if (ocrEngineMode == TessBaseAPI.OEM_TESSERACT_ONLY) {
-			ocrEngineModeName = ocrEngineModes[0];
-		} else if (ocrEngineMode == TessBaseAPI.OEM_CUBE_ONLY) {
-			ocrEngineModeName = ocrEngineModes[1];
-		} else if (ocrEngineMode == TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED) {
-			ocrEngineModeName = ocrEngineModes[2];
-		}
-		return ocrEngineModeName;
-	}
-
-	/**
 	 * Gets values from shared preferences and sets the corresponding data members in this activity.
 	 */
 	private void retrievePreferences() {
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-		// Retrieve from preferences, and set in this Activity, the language preferences
-		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-		setSourceLanguage(prefs.getString(PreferencesActivity.KEY_SOURCE_LANGUAGE_PREFERENCE, CaptureActivity.DEFAULT_SOURCE_LANGUAGE_CODE));
-		setTargetLanguage(prefs.getString(PreferencesActivity.KEY_TARGET_LANGUAGE_PREFERENCE, CaptureActivity.DEFAULT_TARGET_LANGUAGE_CODE));
-		isTranslationActive = prefs.getBoolean(PreferencesActivity.KEY_TOGGLE_TRANSLATION, false);
-
-		// Retrieve from preferences, and set in this Activity, the capture mode preference
-		if (prefs.getBoolean(PreferencesActivity.KEY_CONTINUOUS_PREVIEW, CaptureActivity.DEFAULT_TOGGLE_CONTINUOUS)) {
-			isContinuousModeActive = true;
-		} else {
-			isContinuousModeActive = false;
-		}
-
-		// Retrieve from preferences, and set in this Activity, the page segmentation mode preference
+		//TODO: page segmentation mode preference
 		String[] pageSegmentationModes = getResources().getStringArray(R.array.pagesegmentationmodes);
-		String pageSegmentationModeName = prefs.getString(PreferencesActivity.KEY_PAGE_SEGMENTATION_MODE, pageSegmentationModes[0]);
+		String pageSegmentationModeName = pageSegmentationModes[0];
 		if (pageSegmentationModeName.equals(pageSegmentationModes[0])) {
 			pageSegmentationMode = TessBaseAPI.PSM_AUTO_OSD;
 		} else if (pageSegmentationModeName.equals(pageSegmentationModes[1])) {
@@ -1068,84 +776,16 @@ ShutterButton.OnShutterButtonListener {
 			pageSegmentationMode = TessBaseAPI.PSM_SINGLE_BLOCK_VERT_TEXT;
 		}
 
-		// Retrieve from preferences, and set in this Activity, the OCR engine mode
-		String[] ocrEngineModes = getResources().getStringArray(R.array.ocrenginemodes);
-		String ocrEngineModeName = prefs.getString(PreferencesActivity.KEY_OCR_ENGINE_MODE, ocrEngineModes[0]);
-		if (ocrEngineModeName.equals(ocrEngineModes[0])) {
-			ocrEngineMode = TessBaseAPI.OEM_TESSERACT_ONLY;
-		} else if (ocrEngineModeName.equals(ocrEngineModes[1])) {
-			ocrEngineMode = TessBaseAPI.OEM_CUBE_ONLY;
-		} else if (ocrEngineModeName.equals(ocrEngineModes[2])) {
-			ocrEngineMode = TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED;
-		}
-
-		// Retrieve from preferences, and set in this Activity, the character blacklist and whitelist
-		characterBlacklist = OcrCharacterHelper.getBlacklist(prefs, sourceLanguageCodeOcr);
-		characterWhitelist = OcrCharacterHelper.getWhitelist(prefs, sourceLanguageCodeOcr);
+		ocrEngineMode = TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED;
 
 		prefs.registerOnSharedPreferenceChangeListener(listener);
-
-		beepManager.updatePrefs();
-	}
-
-	/**
-	 * Sets default values for preferences. To be called the first time this app is run.
-	 */
-	private void setDefaultPreferences() {
-		prefs = PreferenceManager.getDefaultSharedPreferences(this);
-
-		// Continuous preview
-		prefs.edit().putBoolean(PreferencesActivity.KEY_CONTINUOUS_PREVIEW, CaptureActivity.DEFAULT_TOGGLE_CONTINUOUS).commit();
-
-		// Recognition language
-		prefs.edit().putString(PreferencesActivity.KEY_SOURCE_LANGUAGE_PREFERENCE, CaptureActivity.DEFAULT_SOURCE_LANGUAGE_CODE).commit();
-
-		// Translation
-		prefs.edit().putBoolean(PreferencesActivity.KEY_TOGGLE_TRANSLATION, CaptureActivity.DEFAULT_TOGGLE_TRANSLATION).commit();
-
-		// Translation target language
-		prefs.edit().putString(PreferencesActivity.KEY_TARGET_LANGUAGE_PREFERENCE, CaptureActivity.DEFAULT_TARGET_LANGUAGE_CODE).commit();
-
-		// Translator
-		prefs.edit().putString(PreferencesActivity.KEY_TRANSLATOR, CaptureActivity.DEFAULT_TRANSLATOR).commit();
-
-		// OCR Engine
-		prefs.edit().putString(PreferencesActivity.KEY_OCR_ENGINE_MODE, CaptureActivity.DEFAULT_OCR_ENGINE_MODE).commit();
-
-		// Autofocus
-		prefs.edit().putBoolean(PreferencesActivity.KEY_AUTO_FOCUS, CaptureActivity.DEFAULT_TOGGLE_AUTO_FOCUS).commit();
-
-		// Beep
-		prefs.edit().putBoolean(PreferencesActivity.KEY_PLAY_BEEP, CaptureActivity.DEFAULT_TOGGLE_BEEP).commit();
-
-		// Character blacklist
-		prefs.edit().putString(PreferencesActivity.KEY_CHARACTER_BLACKLIST,
-				OcrCharacterHelper.getDefaultBlacklist(CaptureActivity.DEFAULT_SOURCE_LANGUAGE_CODE)).commit();
-
-		// Character whitelist
-		prefs.edit().putString(PreferencesActivity.KEY_CHARACTER_WHITELIST,
-				OcrCharacterHelper.getDefaultWhitelist(CaptureActivity.DEFAULT_SOURCE_LANGUAGE_CODE)).commit();
-
-		// Page segmentation mode
-		prefs.edit().putString(PreferencesActivity.KEY_PAGE_SEGMENTATION_MODE, CaptureActivity.DEFAULT_PAGE_SEGMENTATION_MODE).commit();
-
-		// Reversed camera image
-		prefs.edit().putBoolean(PreferencesActivity.KEY_REVERSE_IMAGE, CaptureActivity.DEFAULT_TOGGLE_REVERSED_IMAGE).commit();
-
-		// Light
-		prefs.edit().putBoolean(PreferencesActivity.KEY_TOGGLE_LIGHT, CaptureActivity.DEFAULT_TOGGLE_LIGHT).commit();
 	}
 
 	void displayProgressDialog() {
 		// Set up the indeterminate progress dialog box
 		indeterminateDialog = new ProgressDialog(this);
 		indeterminateDialog.setTitle("Please wait");
-		String ocrEngineModeName = getOcrEngineModeName();
-		if (ocrEngineModeName.equals("Both")) {
-			indeterminateDialog.setMessage("Performing OCR using Cube and Tesseract...");
-		} else {
-			indeterminateDialog.setMessage("Performing OCR using " + ocrEngineModeName + "...");
-		}
+		indeterminateDialog.setMessage("Performing OCR using Cube and Tesseract...");
 		indeterminateDialog.setCancelable(false);
 		indeterminateDialog.show();
 	}

@@ -48,7 +48,7 @@ final class CaptureActivityHandler extends Handler {
 		DONE
 	}
 
-	CaptureActivityHandler(CaptureActivity activity, CameraManager cameraManager, boolean isContinuousModeActive) {
+	CaptureActivityHandler(CaptureActivity activity, CameraManager cameraManager) {
 		this.activity = activity;
 		this.cameraManager = cameraManager;
 
@@ -58,24 +58,12 @@ final class CaptureActivityHandler extends Handler {
 		decodeThread = new DecodeThread(activity);
 		decodeThread.start();
 
-		if (isContinuousModeActive) {
-			state = State.CONTINUOUS;
+		state = State.SUCCESS;
 
-			// Show the shutter and torch buttons
-			activity.setButtonVisibility(true);
+		// Show the shutter and torch buttons
+		activity.setButtonVisibility(true);
 
-			// Display a "be patient" message while first recognition request is running
-			activity.setStatusViewForContinuous();
-
-			restartOcrPreviewAndDecode();
-		} else {
-			state = State.SUCCESS;
-
-			// Show the shutter and torch buttons
-			activity.setButtonVisibility(true);
-
-			restartOcrPreview();
-		}
+		restartOcrPreview();
 	}
 
 	@Override
