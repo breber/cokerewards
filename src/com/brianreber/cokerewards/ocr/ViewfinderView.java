@@ -81,6 +81,7 @@ public final class ViewfinderView extends View {
 	//  Rect bounds;
 	private Rect previewFrame;
 	private Rect rect;
+	private Rect bounds;
 
 	// This constructor is used when the class is built from an XML resource.
 	public ViewfinderView(Context context, AttributeSet attrs) {
@@ -93,7 +94,7 @@ public final class ViewfinderView extends View {
 		frameColor = resources.getColor(R.color.viewfinder_frame);
 		cornerColor = resources.getColor(R.color.viewfinder_corners);
 
-		//    bounds = new Rect();
+		bounds = new Rect();
 		previewFrame = new Rect();
 		rect = new Rect();
 	}
@@ -126,8 +127,6 @@ public final class ViewfinderView extends View {
 			Point bitmapSize = resultText.getBitmapDimensions();
 			previewFrame = cameraManager.getFramingRectInPreview();
 			if (bitmapSize.x == previewFrame.width() && bitmapSize.y == previewFrame.height()) {
-
-
 				float scaleX = frame.width() / (float) previewFrame.width();
 				float scaleY = frame.height() / (float) previewFrame.height();
 
@@ -180,11 +179,6 @@ public final class ViewfinderView extends View {
 				if (DRAW_WORD_BOXES || DRAW_WORD_TEXT) {
 					// Split the text into words
 					wordBoundingBoxes = resultText.getWordBoundingBoxes();
-					//      for (String w : words) {
-					//        Log.e("ViewfinderView", "word: " + w);
-					//      }
-					//Log.d("ViewfinderView", "There are " + words.length + " words in the string array.");
-					//Log.d("ViewfinderView", "There are " + wordBoundingBoxes.size() + " words with bounding boxes.");
 				}
 
 				if (DRAW_WORD_BOXES) {
@@ -243,7 +237,6 @@ public final class ViewfinderView extends View {
 							paint.setTextSize(100);
 							paint.setTextScaleX(1.0f);
 							// ask the paint for the bounding rect if it were to draw this text
-							Rect bounds = new Rect();
 							paint.getTextBounds(words[i], 0, words[i].length(), bounds);
 							// get the height that would have been produced
 							int h = bounds.bottom - bounds.top;
@@ -316,13 +309,11 @@ public final class ViewfinderView extends View {
 							letter = Character.toString(c);
 
 							if (!letter.equals("-") && !letter.equals("_")) {
-
 								// Adjust text size to fill rect
 								paint.setTextSize(100);
 								paint.setTextScaleX(1.0f);
 
 								// ask the paint for the bounding rect if it were to draw this text
-								Rect bounds = new Rect();
 								paint.getTextBounds(letter, 0, letter.length(), bounds);
 
 								// get the height that would have been produced
@@ -367,10 +358,6 @@ public final class ViewfinderView extends View {
 		canvas.drawRect(frame.left - 15, frame.bottom - 15, frame.left, frame.bottom, paint);
 		canvas.drawRect(frame.right - 15, frame.bottom, frame.right + 15, frame.bottom + 15, paint);
 		canvas.drawRect(frame.right, frame.bottom - 15, frame.right + 15, frame.bottom + 15, paint);
-
-
-		// Request another update at the animation interval, but don't repaint the entire viewfinder mask.
-		//postInvalidateDelayed(ANIMATION_DELAY, frame.left, frame.top, frame.right, frame.bottom);
 	}
 
 	public void drawViewfinder() {

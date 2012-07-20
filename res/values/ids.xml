@@ -14,19 +14,16 @@
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  See the License for the specific language governing permissions and
  limitations under the License.
- -->
+-->
 <resources>
-  <item type="id" name="decode"/>
-  <item type="id" name="decode_failed"/>
-  <item type="id" name="decode_succeeded"/>
 
-  <item type="id" name="ocr_continuous_decode"/>
-  <item type="id" name="ocr_continuous_decode_failed"/>
-  <item type="id" name="ocr_continuous_decode_succeeded"/>
-  <item type="id" name="ocr_decode"/>
-  <item type="id" name="ocr_decode_failed"/>
-  <item type="id" name="ocr_decode_succeeded"/>
-  
-  <item type="id" name="quit"/>
-  <item type="id" name="restart_preview"/>
+    <item name="decode" type="id"/>
+    <item name="decode_failed" type="id"/>
+    <item name="decode_succeeded" type="id"/>
+    <item name="ocr_decode" type="id"/>
+    <item name="ocr_decode_failed" type="id"/>
+    <item name="ocr_decode_succeeded" type="id"/>
+    <item name="quit" type="id"/>
+    <item name="restart_preview" type="id"/>
+
 </resources>

@@ -17,11 +17,10 @@
 
 package com.brianreber.cokerewards.ocr;
 
-import android.os.Handler;
-import android.os.Looper;
 import java.util.concurrent.CountDownLatch;
 
-import com.brianreber.cokerewards.ocr.CaptureActivity;
+import android.os.Handler;
+import android.os.Looper;
 
 /**
  * This thread does all the heavy lifting of decoding the images.
@@ -30,29 +29,29 @@ import com.brianreber.cokerewards.ocr.CaptureActivity;
  */
 final class DecodeThread extends Thread {
 
-  private final CaptureActivity activity;
-  private Handler handler;
-  private final CountDownLatch handlerInitLatch;
+	private final CaptureActivity activity;
+	private Handler handler;
+	private final CountDownLatch handlerInitLatch;
 
-  DecodeThread(CaptureActivity activity) {
-    this.activity = activity;
-    handlerInitLatch = new CountDownLatch(1);
-  }
+	DecodeThread(CaptureActivity activity) {
+		this.activity = activity;
+		handlerInitLatch = new CountDownLatch(1);
+	}
 
-  Handler getHandler() {
-    try {
-      handlerInitLatch.await();
-    } catch (InterruptedException ie) {
-      // continue?
-    }
-    return handler;
-  }
+	Handler getHandler() {
+		try {
+			handlerInitLatch.await();
+		} catch (InterruptedException ie) {
+			// continue?
+		}
+		return handler;
+	}
 
-  @Override
-  public void run() {
-    Looper.prepare();
-    handler = new DecodeHandler(activity);
-    handlerInitLatch.countDown();
-    Looper.loop();
-  }
+	@Override
+	public void run() {
+		Looper.prepare();
+		handler = new DecodeHandler(activity);
+		handlerInitLatch.countDown();
+		Looper.loop();
+	}
 }

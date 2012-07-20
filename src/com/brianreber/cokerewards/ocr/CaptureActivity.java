@@ -25,21 +25,11 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.preference.PreferenceManager;
-import android.text.SpannableStringBuilder;
-import android.text.style.CharacterStyle;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -69,49 +59,8 @@ ShutterButton.OnShutterButtonListener {
 	private static final String TAG = CaptureActivity.class.getSimpleName();
 
 	// Note: These constants will be overridden by any default values defined in preferences.xml.
-
-	/** ISO 639-3 language code indicating the default recognition language. */
-	public static final String DEFAULT_SOURCE_LANGUAGE_CODE = "eng";
-
-	/** ISO 639-1 language code indicating the default target language for translation. */
-	public static final String DEFAULT_TARGET_LANGUAGE_CODE = "es";
-
-	/** The default online machine translation service to use. */
-	public static final String DEFAULT_TRANSLATOR = "Bing Translator";
-
-	/** The default OCR engine to use. */
-	public static final String DEFAULT_OCR_ENGINE_MODE = "Tesseract";
-
 	/** The default page segmentation mode to use. */
 	public static final String DEFAULT_PAGE_SEGMENTATION_MODE = "Auto";
-
-	/** Whether to use autofocus by default. */
-	public static final boolean DEFAULT_TOGGLE_AUTO_FOCUS = true;
-
-	/** Whether to beep by default when the shutter button is pressed. */
-	public static final boolean DEFAULT_TOGGLE_BEEP = true;
-
-	/** Whether to initially show a looping, real-time OCR display. */
-	public static final boolean DEFAULT_TOGGLE_CONTINUOUS = false;
-
-	/** Whether to initially reverse the image returned by the camera. */
-	public static final boolean DEFAULT_TOGGLE_REVERSED_IMAGE = false;
-
-	/** Whether to enable the use of online translation services be default. */
-	public static final boolean DEFAULT_TOGGLE_TRANSLATION = true;
-
-	/** Whether the light should be initially activated by default. */
-	public static final boolean DEFAULT_TOGGLE_LIGHT = false;
-
-
-	/** Flag to display the real-time recognition results at the top of the scanning screen. */
-	private static final boolean CONTINUOUS_DISPLAY_RECOGNIZED_TEXT = true;
-
-	/** Flag to display recognition-related statistics on the scanning screen. */
-	private static final boolean CONTINUOUS_DISPLAY_METADATA = true;
-
-	/** Flag to enable display of the on-screen shutter button. */
-	private static final boolean DISPLAY_SHUTTER_BUTTON = true;
 
 	/** Resource to use for data file downloads. */
 	static final String DOWNLOAD_BASE = "http://tesseract-ocr.googlecode.com/files/";
@@ -121,9 +70,6 @@ ShutterButton.OnShutterButtonListener {
 
 	/** Destination filename for orientation and script detection (OSD) data. */
 	static final String OSD_FILENAME_BASE = "osd.traineddata";
-
-	/** Minimum mean confidence score necessary to not reject single-shot OCR result. Currently unused. */
-	static final int MINIMUM_MEAN_CONFIDENCE = 0; // 0 means don't reject any scored results
 
 	private CameraManager cameraManager;
 	private CaptureActivityHandler handler;
@@ -139,15 +85,11 @@ ShutterButton.OnShutterButtonListener {
 	private String sourceLanguageCodeOcr = "eng"; // ISO 639-3 language code
 	private String sourceLanguageReadable = "English"; // Language name, for example, "English"
 	private int pageSegmentationMode = TessBaseAPI.PSM_AUTO;
-	private int ocrEngineMode = TessBaseAPI.OEM_TESSERACT_ONLY;
 	private ShutterButton shutterButton;
 	//  private ToggleButton torchButton;
-	private SharedPreferences prefs;
-	private OnSharedPreferenceChangeListener listener;
 	private ProgressDialog dialog; // for initOcr - language download & unzip
 	private ProgressDialog indeterminateDialog; // also for initOcr - init OCR engine
 	private boolean isEngineReady;
-	private static boolean isFirstLaunch; // True if this is the first time the app is being run
 
 	Handler getHandler() {
 		return handler;
@@ -164,9 +106,6 @@ ShutterButton.OnShutterButtonListener {
 	@Override
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
-
-		checkFirstLaunch();
-
 		Window window = getWindow();
 		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
@@ -184,10 +123,8 @@ ShutterButton.OnShutterButtonListener {
 		hasSurface = false;
 
 		// Camera shutter button
-		if (DISPLAY_SHUTTER_BUTTON) {
-			shutterButton = (ShutterButton) findViewById(R.id.shutter_button);
-			shutterButton.setOnShutterButtonListener(this);
-		}
+		shutterButton = (ShutterButton) findViewById(R.id.shutter_button);
+		shutterButton.setOnShutterButtonListener(this);
 
 		cameraManager = new CameraManager(getApplication());
 		viewfinderView.setCameraManager(cameraManager);
@@ -281,25 +218,17 @@ ShutterButton.OnShutterButtonListener {
 		super.onResume();
 		resetStatusView();
 
-		String previousSourceLanguageCodeOcr = sourceLanguageCodeOcr;
-		int previousOcrEngineMode = ocrEngineMode;
-
-		retrievePreferences();
-
 		// Set up the camera preview surface.
 		surfaceView = (SurfaceView) findViewById(R.id.preview_view);
 		surfaceHolder = surfaceView.getHolder();
 		if (!hasSurface) {
 			surfaceHolder.addCallback(this);
-			surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 		}
 
 		// Comment out the following block to test non-OCR functions without an SD card
 
 		// Do OCR engine initialization, if necessary
-		boolean doNewInit = (baseApi == null) || !sourceLanguageCodeOcr.equals(previousSourceLanguageCodeOcr) ||
-				ocrEngineMode != previousOcrEngineMode;
-		if (doNewInit) {
+		if (baseApi == null) {
 			// Initialize the OCR engine
 			File storageDirectory = getStorageDirectory();
 			if (storageDirectory != null) {
@@ -322,10 +251,6 @@ ShutterButton.OnShutterButtonListener {
 		// This method is called when Tesseract has already been successfully initialized, so set
 		// isEngineReady = true here.
 		isEngineReady = true;
-
-		if (handler != null) {
-			handler.resetState();
-		}
 		if (baseApi != null) {
 			baseApi.setPageSegMode(pageSegmentationMode);
 			baseApi.setVariable(TessBaseAPI.VAR_CHAR_BLACKLIST, OcrCharacterHelper.getBlacklist());
@@ -362,13 +287,11 @@ ShutterButton.OnShutterButtonListener {
 			throw new IllegalStateException("No SurfaceHolder provided");
 		}
 		try {
-
 			// Open and initialize the camera
 			cameraManager.openDriver(surfaceHolder);
 
 			// Creating the handler starts the preview, which can also throw a RuntimeException.
 			handler = new CaptureActivityHandler(this, cameraManager);
-
 		} catch (IOException ioe) {
 			showErrorMessage("Error", "Could not initialize camera. Please try restarting device.");
 		} catch (RuntimeException e) {
@@ -412,7 +335,6 @@ ShutterButton.OnShutterButtonListener {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
-
 			// Exit the app if we're not viewing an OCR result.
 			if (lastResult == null) {
 				setResult(RESULT_CANCELED);
@@ -494,12 +416,11 @@ ShutterButton.OnShutterButtonListener {
 			dialog.dismiss();
 		}
 		dialog = new ProgressDialog(this);
-		ocrEngineMode = TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED;
 
 		// Display the name of the OCR engine we're initializing in the indeterminate progress dialog box
 		indeterminateDialog = new ProgressDialog(this);
 		indeterminateDialog.setTitle("Please wait");
-		indeterminateDialog.setMessage("Initializing Cube and Tesseract OCR engines for " + languageName + "...");
+		indeterminateDialog.setMessage("Initializing...");
 		indeterminateDialog.setCancelable(false);
 		indeterminateDialog.show();
 
@@ -509,8 +430,7 @@ ShutterButton.OnShutterButtonListener {
 
 		// Start AsyncTask to install language data and init OCR
 		baseApi = new TessBaseAPI();
-		new OcrInitAsyncTask(this, baseApi, dialog, indeterminateDialog, languageCode, languageName, ocrEngineMode)
-		.execute(storageRoot.toString());
+		new OcrInitAsyncTask(this, baseApi, dialog, indeterminateDialog).execute(storageRoot.toString());
 	}
 
 	/**
@@ -538,142 +458,18 @@ ShutterButton.OnShutterButtonListener {
 	}
 
 	/**
-	 * Displays information relating to the results of a successful real-time OCR request.
-	 * 
-	 * @param ocrResult Object representing successful OCR results
-	 */
-	void handleOcrContinuousDecode(OcrResult ocrResult) {
-
-		lastResult = ocrResult;
-
-		// Send an OcrResultText object to the ViewfinderView for text rendering
-		viewfinderView.addResultText(new OcrResultText(ocrResult.getText(),
-				ocrResult.getWordConfidences(),
-				ocrResult.getMeanConfidence(),
-				ocrResult.getBitmapDimensions(),
-				ocrResult.getRegionBoundingBoxes(),
-				ocrResult.getTextlineBoundingBoxes(),
-				ocrResult.getStripBoundingBoxes(),
-				ocrResult.getWordBoundingBoxes(),
-				ocrResult.getCharacterBoundingBoxes()));
-
-		Integer meanConfidence = ocrResult.getMeanConfidence();
-
-		if (CONTINUOUS_DISPLAY_RECOGNIZED_TEXT) {
-			// Display the recognized text on the screen
-			statusViewTop.setText(ocrResult.getText());
-			int scaledSize = Math.max(22, 32 - ocrResult.getText().length() / 4);
-			statusViewTop.setTextSize(TypedValue.COMPLEX_UNIT_SP, scaledSize);
-			statusViewTop.setTextColor(Color.BLACK);
-			statusViewTop.setBackgroundResource(R.color.status_top_text_background);
-
-			statusViewTop.getBackground().setAlpha(meanConfidence * (255 / 100));
-		}
-
-		if (CONTINUOUS_DISPLAY_METADATA) {
-			// Display recognition-related metadata at the bottom of the screen
-			long recognitionTimeRequired = ocrResult.getRecognitionTimeRequired();
-			statusViewBottom.setTextSize(14);
-			statusViewBottom.setText("OCR: " + sourceLanguageReadable + " - Mean confidence: " +
-					meanConfidence.toString() + " - Time required: " + recognitionTimeRequired + " ms");
-		}
-	}
-
-	/**
-	 * Version of handleOcrContinuousDecode for failed OCR requests. Displays a failure message.
-	 * 
-	 * @param obj Metadata for the failed OCR request.
-	 */
-	void handleOcrContinuousDecode(OcrResultFailure obj) {
-		lastResult = null;
-		viewfinderView.removeResultText();
-
-		// Reset the text in the recognized text box.
-		statusViewTop.setText("");
-
-		if (CONTINUOUS_DISPLAY_METADATA) {
-			// Color text delimited by '-' as red.
-			statusViewBottom.setTextSize(14);
-			CharSequence cs = setSpanBetweenTokens("OCR: " + sourceLanguageReadable + " - OCR failed - Time required: "
-					+ obj.getTimeRequired() + " ms", "-", new ForegroundColorSpan(0xFFFF0000));
-			statusViewBottom.setText(cs);
-		}
-	}
-
-	/**
-	 * Given either a Spannable String or a regular String and a token, apply
-	 * the given CharacterStyle to the span between the tokens.
-	 * 
-	 * NOTE: This method was adapted from:
-	 *  http://www.androidengineer.com/2010/08/easy-method-for-formatting-android.html
-	 * 
-	 * <p>
-	 * For example, {@code setSpanBetweenTokens("Hello ##world##!", "##", new
-	 * ForegroundColorSpan(0xFFFF0000));} will return a CharSequence {@code
-	 * "Hello world!"} with {@code world} in red.
-	 * 
-	 */
-	private CharSequence setSpanBetweenTokens(CharSequence text, String token,
-			CharacterStyle... cs) {
-		// Start and end refer to the points where the span will apply
-		int tokenLen = token.length();
-		int start = text.toString().indexOf(token) + tokenLen;
-		int end = text.toString().indexOf(token, start);
-
-		if (start > -1 && end > -1) {
-			// Copy the spannable string to a mutable spannable string
-			SpannableStringBuilder ssb = new SpannableStringBuilder(text);
-			for (CharacterStyle c : cs)
-				ssb.setSpan(c, start, end, 0);
-			text = ssb;
-		}
-		return text;
-	}
-
-	/**
 	 * Resets view elements.
 	 */
 	private void resetStatusView() {
-		if (CONTINUOUS_DISPLAY_METADATA) {
-			statusViewBottom.setText("");
-			statusViewBottom.setTextSize(14);
-			statusViewBottom.setTextColor(getResources().getColor(R.color.status_text));
-			statusViewBottom.setVisibility(View.VISIBLE);
-		}
-		if (CONTINUOUS_DISPLAY_RECOGNIZED_TEXT) {
-			statusViewTop.setText("");
-			statusViewTop.setTextSize(14);
-			statusViewTop.setVisibility(View.VISIBLE);
-		}
 		viewfinderView.setVisibility(View.VISIBLE);
 		cameraButtonView.setVisibility(View.VISIBLE);
-		if (DISPLAY_SHUTTER_BUTTON) {
-			shutterButton.setVisibility(View.VISIBLE);
-		}
+		shutterButton.setVisibility(View.VISIBLE);
 		lastResult = null;
 		viewfinderView.removeResultText();
 	}
 
-	/** Displays a pop-up message showing the name of the current OCR source language. */
-	void showLanguageName() {
-		Toast toast = Toast.makeText(this, "OCR: " + sourceLanguageReadable, Toast.LENGTH_LONG);
-		toast.setGravity(Gravity.TOP, 0, 0);
-		toast.show();
-	}
-
-	/**
-	 * Displays an initial message to the user while waiting for the first OCR request to be
-	 * completed after starting realtime OCR.
-	 */
-	void setStatusViewForContinuous() {
-		viewfinderView.removeResultText();
-		if (CONTINUOUS_DISPLAY_METADATA) {
-			statusViewBottom.setText("OCR: " + sourceLanguageReadable + " - waiting for OCR...");
-		}
-	}
-
 	void setButtonVisibility(boolean visible) {
-		if (shutterButton != null && visible == true && DISPLAY_SHUTTER_BUTTON) {
+		if (shutterButton != null && visible == true) {
 			shutterButton.setVisibility(View.VISIBLE);
 		} else if (shutterButton != null) {
 			shutterButton.setVisibility(View.GONE);
@@ -715,70 +511,6 @@ ShutterButton.OnShutterButtonListener {
 		// Wait 350 ms before focusing to avoid interfering with quick button presses when
 		// the user just wants to take a picture without focusing.
 		cameraManager.requestAutoFocus(350L);
-	}
-
-	static boolean getFirstLaunch() {
-		return isFirstLaunch;
-	}
-
-	/**
-	 * We want the help screen to be shown automatically the first time a new version of the app is
-	 * run. The easiest way to do this is to check android:versionCode from the manifest, and compare
-	 * it to a value stored as a preference.
-	 */
-	private boolean checkFirstLaunch() {
-		try {
-			PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
-			int currentVersion = info.versionCode;
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-			int lastVersion = prefs.getInt("lastVersion", 0);
-			if (lastVersion == 0) {
-				isFirstLaunch = true;
-			} else {
-				isFirstLaunch = false;
-			}
-			if (currentVersion > lastVersion) {
-				// Record the last version for which we last displayed the What's New (Help) page
-				prefs.edit().putInt("lastVersion", currentVersion).commit();
-
-				return true;
-			}
-		} catch (PackageManager.NameNotFoundException e) {
-			Log.w(TAG, e);
-		}
-		return false;
-	}
-
-	/**
-	 * Gets values from shared preferences and sets the corresponding data members in this activity.
-	 */
-	private void retrievePreferences() {
-		prefs = PreferenceManager.getDefaultSharedPreferences(this);
-
-		//TODO: page segmentation mode preference
-		String[] pageSegmentationModes = getResources().getStringArray(R.array.pagesegmentationmodes);
-		String pageSegmentationModeName = pageSegmentationModes[0];
-		if (pageSegmentationModeName.equals(pageSegmentationModes[0])) {
-			pageSegmentationMode = TessBaseAPI.PSM_AUTO_OSD;
-		} else if (pageSegmentationModeName.equals(pageSegmentationModes[1])) {
-			pageSegmentationMode = TessBaseAPI.PSM_AUTO;
-		} else if (pageSegmentationModeName.equals(pageSegmentationModes[2])) {
-			pageSegmentationMode = TessBaseAPI.PSM_SINGLE_BLOCK;
-		} else if (pageSegmentationModeName.equals(pageSegmentationModes[3])) {
-			pageSegmentationMode = TessBaseAPI.PSM_SINGLE_CHAR;
-		} else if (pageSegmentationModeName.equals(pageSegmentationModes[4])) {
-			pageSegmentationMode = TessBaseAPI.PSM_SINGLE_COLUMN;
-		} else if (pageSegmentationModeName.equals(pageSegmentationModes[5])) {
-			pageSegmentationMode = TessBaseAPI.PSM_SINGLE_LINE;
-		} else if (pageSegmentationModeName.equals(pageSegmentationModes[6])) {
-			pageSegmentationMode = TessBaseAPI.PSM_SINGLE_WORD;
-		} else if (pageSegmentationModeName.equals(pageSegmentationModes[7])) {
-			pageSegmentationMode = TessBaseAPI.PSM_SINGLE_BLOCK_VERT_TEXT;
-		}
-
-		ocrEngineMode = TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED;
-
-		prefs.registerOnSharedPreferenceChangeListener(listener);
 	}
 
 	void displayProgressDialog() {

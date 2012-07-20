@@ -56,7 +56,7 @@ final class OcrInitAsyncTask extends AsyncTask<String, String, Boolean> {
 		".cube.lm",
 		".cube.nn",
 		".cube.params",
-		//".cube.size", // This file is not available for Hindi
+		".cube.size",
 		".cube.word-freq",
 		".tesseract_cube.nn",
 		".traineddata"
@@ -69,7 +69,6 @@ final class OcrInitAsyncTask extends AsyncTask<String, String, Boolean> {
 	private ProgressDialog indeterminateDialog;
 	private final String languageCode;
 	private String languageName;
-	private int ocrEngineMode;
 
 	/**
 	 * AsyncTask to asynchronously download data and initialize Tesseract.
@@ -90,16 +89,14 @@ final class OcrInitAsyncTask extends AsyncTask<String, String, Boolean> {
 	 *          Whether to use Tesseract, Cube, or both
 	 */
 	OcrInitAsyncTask(CaptureActivity activity, TessBaseAPI baseApi, ProgressDialog dialog,
-			ProgressDialog indeterminateDialog, String languageCode, String languageName,
-			int ocrEngineMode) {
+			ProgressDialog indeterminateDialog) {
 		this.activity = activity;
 		this.context = activity.getBaseContext();
 		this.baseApi = baseApi;
 		this.dialog = dialog;
 		this.indeterminateDialog = indeterminateDialog;
-		this.languageCode = languageCode;
-		this.languageName = languageName;
-		this.ocrEngineMode = ocrEngineMode;
+		this.languageCode = "eng";
+		this.languageName = "English";
 	}
 
 	@Override
@@ -127,7 +124,6 @@ final class OcrInitAsyncTask extends AsyncTask<String, String, Boolean> {
 		// Example Cube data filename: "tesseract-ocr-3.01.eng.tar"
 		// Example Tesseract data filename: "eng.traineddata"
 		String destinationFilenameBase = languageCode + ".traineddata";
-		boolean isCubeSupported = isCubeSupported = true;
 		destinationFilenameBase = "tesseract-ocr-3.01." + languageCode + ".tar";
 
 		// Check for, and create if necessary, folder to hold model data
@@ -156,22 +152,19 @@ final class OcrInitAsyncTask extends AsyncTask<String, String, Boolean> {
 
 		// Check whether all Cube data files have already been installed
 		boolean isAllCubeDataInstalled = false;
-		if (isCubeSupported) {
-			boolean isAFileMissing = false;
-			File dataFile;
-			for (String s : CUBE_DATA_FILES) {
-				dataFile = new File(tessdataDir.toString() + File.separator + languageCode + s);
-				if (!dataFile.exists()) {
-					isAFileMissing = true;
-				}
+		boolean isAFileMissing = false;
+		File dataFile;
+		for (String s : CUBE_DATA_FILES) {
+			dataFile = new File(tessdataDir.toString() + File.separator + languageCode + s);
+			if (!dataFile.exists()) {
+				isAFileMissing = true;
 			}
-			isAllCubeDataInstalled = !isAFileMissing;
 		}
+		isAllCubeDataInstalled = !isAFileMissing;
 
 		// If language data files are not present, install them
 		boolean installSuccess = false;
-		if (!tesseractTestFile.exists()
-				|| (isCubeSupported && !isAllCubeDataInstalled)) {
+		if (!tesseractTestFile.exists() || !isAllCubeDataInstalled) {
 			Log.d(TAG, "Language data for " + languageCode + " not found in " + tessdataDir.toString());
 			deleteCubeDataFiles(tessdataDir);
 
@@ -290,7 +283,7 @@ final class OcrInitAsyncTask extends AsyncTask<String, String, Boolean> {
 		}
 
 		// Initialize the OCR engine
-		if (baseApi.init(destinationDirBase + File.separator, languageCode, ocrEngineMode)) {
+		if (baseApi.init(destinationDirBase + File.separator, languageCode, TessBaseAPI.OEM_TESSERACT_CUBE_COMBINED)) {
 			return installSuccess && osdInstallSuccess;
 		}
 		return false;
@@ -311,8 +304,7 @@ final class OcrInitAsyncTask extends AsyncTask<String, String, Boolean> {
 				Log.d(TAG, "Deleting existing file " + badFile.toString());
 				badFile.delete();
 			}
-			badFile = new File(tessdataDir.toString() + File.separator + "tesseract-ocr-3.01."
-					+ languageCode + ".tar");
+			badFile = new File(tessdataDir.toString() + File.separator + "tesseract-ocr-3.01." + languageCode + ".tar");
 			if (badFile.exists()) {
 				Log.d(TAG, "Deleting existing file " + badFile.toString());
 				badFile.delete();
@@ -562,14 +554,15 @@ final class OcrInitAsyncTask extends AsyncTask<String, String, Boolean> {
 	 */
 	private int getTarSizeUncompressed(File tarFile) throws IOException {
 		int size = 0;
-		TarInputStream tis = new TarInputStream(new BufferedInputStream(
-				new FileInputStream(tarFile)));
+		TarInputStream tis = new TarInputStream(new BufferedInputStream(new FileInputStream(tarFile)));
 		TarEntry entry;
 		while ((entry = tis.getNextEntry()) != null) {
 			if (!entry.isDirectory()) {
 				size += entry.getSize();
 			}
 		}
+
+		tis.close();
 		return size;
 	}
 
@@ -585,16 +578,13 @@ final class OcrInitAsyncTask extends AsyncTask<String, String, Boolean> {
 	 * @return True if installZipFromAssets returns true
 	 * @throws IOException
 	 */
-	private boolean installFromAssets(String sourceFilename, File modelRoot,
-			File destinationFile) throws IOException {
-		String extension = sourceFilename.substring(sourceFilename.lastIndexOf('.'),
-				sourceFilename.length());
+	private boolean installFromAssets(String sourceFilename, File modelRoot, File destinationFile) throws IOException {
+		String extension = sourceFilename.substring(sourceFilename.lastIndexOf('.'), sourceFilename.length());
 		try {
 			if (extension.equals(".zip")) {
 				return installZipFromAssets(sourceFilename, modelRoot, destinationFile);
 			} else {
-				throw new IllegalArgumentException("Extension " + extension
-						+ " is unsupported.");
+				throw new IllegalArgumentException("Extension " + extension	+ " is unsupported.");
 			}
 		} catch (FileNotFoundException e) {
 			Log.d(TAG, "Language not packaged in application assets.");
@@ -697,7 +687,6 @@ final class OcrInitAsyncTask extends AsyncTask<String, String, Boolean> {
 		if (result) {
 			// Restart recognition
 			activity.resumeOCR();
-			activity.showLanguageName();
 		} else {
 			activity.showErrorMessage("Error", "Network is unreachable - cannot download language data. "
 					+ "Please enable network access and restart this app.");

@@ -42,8 +42,6 @@ final class CaptureActivityHandler extends Handler {
 	private enum State {
 		PREVIEW,
 		PREVIEW_PAUSED,
-		CONTINUOUS,
-		CONTINUOUS_PAUSED,
 		SUCCESS,
 		DONE
 	}
@@ -73,28 +71,6 @@ final class CaptureActivityHandler extends Handler {
 		case R.id.restart_preview:
 			restartOcrPreview();
 			break;
-		case R.id.ocr_continuous_decode_failed:
-			DecodeHandler.resetDecodeState();
-			try {
-				activity.handleOcrContinuousDecode((OcrResultFailure) message.obj);
-			} catch (NullPointerException e) {
-				Log.w(TAG, "got bad OcrResultFailure", e);
-			}
-			if (state == State.CONTINUOUS) {
-				restartOcrPreviewAndDecode();
-			}
-			break;
-		case R.id.ocr_continuous_decode_succeeded:
-			DecodeHandler.resetDecodeState();
-			try {
-				activity.handleOcrContinuousDecode((OcrResult) message.obj);
-			} catch (NullPointerException e) {
-				// Continue
-			}
-			if (state == State.CONTINUOUS) {
-				restartOcrPreviewAndDecode();
-			}
-			break;
 		case R.id.ocr_decode_succeeded:
 			state = State.SUCCESS;
 			activity.setShutterButtonClickable(true);
@@ -114,24 +90,12 @@ final class CaptureActivityHandler extends Handler {
 		// TODO See if this should be done by sending a quit message to decodeHandler as is done
 		// below in quitSynchronously().
 
-		Log.d(TAG, "Setting state to CONTINUOUS_PAUSED.");
-		state = State.CONTINUOUS_PAUSED;
-		removeMessages(R.id.ocr_continuous_decode);
+		Log.d(TAG, "Setting state to PREVIEW_PAUSED.");
+		state = State.PREVIEW_PAUSED;
 		removeMessages(R.id.ocr_decode);
-		removeMessages(R.id.ocr_continuous_decode_failed);
-		removeMessages(R.id.ocr_continuous_decode_succeeded); // TODO are these removeMessages() calls doing anything?
 
 		// Freeze the view displayed to the user.
 		//    CameraManager.get().stopPreview();
-	}
-
-	void resetState() {
-		//Log.d(TAG, "in restart()");
-		if (state == State.CONTINUOUS_PAUSED) {
-			Log.d(TAG, "Setting state to CONTINUOUS");
-			state = State.CONTINUOUS;
-			restartOcrPreviewAndDecode();
-		}
 	}
 
 	void quitSynchronously() {
@@ -156,9 +120,7 @@ final class CaptureActivityHandler extends Handler {
 		}
 
 		// Be absolutely sure we don't send any queued up messages
-		removeMessages(R.id.ocr_continuous_decode);
 		removeMessages(R.id.ocr_decode);
-
 	}
 
 	/**
@@ -174,18 +136,6 @@ final class CaptureActivityHandler extends Handler {
 			// Draw the viewfinder.
 			activity.drawViewfinder();
 		}
-	}
-
-	/**
-	 *  Send a decode request for realtime OCR mode
-	 */
-	private void restartOcrPreviewAndDecode() {
-		// Continue capturing camera frames
-		cameraManager.startPreview();
-
-		// Continue requesting decode of images
-		cameraManager.requestOcrDecode(decodeThread.getHandler(), R.id.ocr_continuous_decode);
-		activity.drawViewfinder();
 	}
 
 	/**
@@ -214,5 +164,4 @@ final class CaptureActivityHandler extends Handler {
 		activity.setShutterButtonClickable(false);
 		ocrDecode();
 	}
-
 }

@@ -144,7 +144,6 @@ final class CameraConfigurationManager {
 	}
 
 	private Point findBestPreviewSizeValue(Camera.Parameters parameters, Point screenResolution) {
-
 		// Sort by size, descending
 		List<Camera.Size> supportedPreviewSizes = new ArrayList<Camera.Size>(parameters.getSupportedPreviewSizes());
 		Collections.sort(supportedPreviewSizes, new Comparator<Camera.Size>() {

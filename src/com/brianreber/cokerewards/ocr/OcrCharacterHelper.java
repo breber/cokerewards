@@ -27,7 +27,7 @@ public class OcrCharacterHelper {
 	}
 
 	public static String getWhitelist() {
-		return "!?@#$%&*()<>_-+=/.,:;'\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 	}
 
 }
