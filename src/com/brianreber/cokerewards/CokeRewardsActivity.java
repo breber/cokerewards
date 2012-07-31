@@ -22,6 +22,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+import com.pontiflex.mobile.webview.sdk.AdManagerFactory;
+import com.pontiflex.mobile.webview.sdk.IAdConfig;
+import com.pontiflex.mobile.webview.sdk.IAdManager;
+import com.pontiflex.mobile.webview.sdk.IAdManager.RegistrationMode;
 
 /**
  * Main activity for the app
@@ -176,6 +180,15 @@ public class CokeRewardsActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+
+		if (isLoggedIn()) {
+			IAdManager adManager = AdManagerFactory.createInstance(getApplication());
+			IAdConfig adConfig = adManager.getAdConfig();
+			adConfig.setWithRegistration(true);
+			adConfig.setLaunchInterval(3);
+			adConfig.setRegistrationMode(RegistrationMode.RegistrationAfterIntervalInLaunches);
+			adManager.showAd(adConfig);
+		}
 
 		tracker = GoogleAnalyticsTracker.getInstance();
 
