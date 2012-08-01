@@ -9,5 +9,6 @@
     <string name="submitting">Submitting code&#8230;</string>
     <string name="logout">Logout</string>
     <string name="showWebsite">Visit MyCokeRewards.com</string>
+    <string name="hideAds">Hide Ads</string>
 
 </resources>

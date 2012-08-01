@@ -2,6 +2,10 @@ package com.brianreber.cokerewards;
 
 import java.util.Map;
 
+import net.robotmedia.billing.BillingController;
+import net.robotmedia.billing.BillingRequest.ResponseCode;
+import net.robotmedia.billing.helper.AbstractBillingObserver;
+import net.robotmedia.billing.model.Transaction.PurchaseState;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -11,6 +15,7 @@ import android.content.SharedPreferences.Editor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -21,6 +26,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.ads.AdView;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 import com.pontiflex.mobile.webview.sdk.AdManagerFactory;
 import com.pontiflex.mobile.webview.sdk.IAdConfig;
@@ -33,6 +39,12 @@ import com.pontiflex.mobile.webview.sdk.IAdManager.RegistrationMode;
  * @author breber
  */
 public class CokeRewardsActivity extends Activity {
+
+	/**
+	 * The in-app purchase product id
+	 */
+	private static final String PRODUCT_ID = "hide_ads";
+
 	/**
 	 * SharedPreference name
 	 */
@@ -84,6 +96,11 @@ public class CokeRewardsActivity extends Activity {
 	private static final int REGISTER_REQUEST_CODE = 1000;
 
 	/**
+	 * LogCat tag
+	 */
+	protected static final String TAG = CokeRewardsActivity.class.getSimpleName();
+
+	/**
 	 * Handler to use for the threads
 	 */
 	private static Handler handler = new Handler();
@@ -97,6 +114,21 @@ public class CokeRewardsActivity extends Activity {
 	 * Dialog to display that we are submitting a code
 	 */
 	private ProgressDialog dlg;
+
+	/**
+	 * The Observer that listens for information about in-app billing
+	 */
+	private AbstractBillingObserver mBillingObserver;
+
+	/**
+	 * Represents whether the device supports in-app billing
+	 */
+	private boolean supportBilling = true;
+
+	/**
+	 * Represents whether the user has purchased the app or not
+	 */
+	private boolean isRegistered = false;
 
 	/**
 	 * A Runnable that will update the UI with values stored
@@ -181,7 +213,9 @@ public class CokeRewardsActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
-		if (isLoggedIn()) {
+		setupInAppBilling();
+
+		if (isLoggedIn() && !isRegistered) {
 			IAdManager adManager = AdManagerFactory.createInstance(getApplication());
 			IAdConfig adConfig = adManager.getAdConfig();
 			adConfig.setWithRegistration(true);
@@ -281,12 +315,83 @@ public class CokeRewardsActivity extends Activity {
 		}
 	}
 
+	/**
+	 * Set up all the in-app billing stuff
+	 */
+	private void setupInAppBilling() {
+		BillingController.setDebug(true);
+		BillingController.setConfiguration(new Security());
+
+		mBillingObserver = new AbstractBillingObserver(this) {
+			@Override
+			public void onBillingChecked(boolean supported) {
+				if (supported) {
+					restoreTransactions();
+				}
+
+				supportBilling = supported;
+			}
+
+			@Override
+			public void onPurchaseStateChanged(String itemId, PurchaseState state) {
+				Log.i(TAG, "onPurchaseStateChanged() itemId: " + itemId + " --> " + state);
+				isRegistered = BillingController.isPurchased(CokeRewardsActivity.this, PRODUCT_ID);
+
+				hideAds();
+			}
+
+			@Override
+			public void onRequestPurchaseResponse(String itemId, ResponseCode response) {
+
+			}
+
+			@Override
+			public void onSubscriptionChecked(boolean supported) {
+
+			}
+		};
+
+		BillingController.registerObserver(mBillingObserver);
+		BillingController.checkBillingSupported(this);
+
+		isRegistered = BillingController.isPurchased(CokeRewardsActivity.this, PRODUCT_ID);
+		hideAds();
+	}
+
+	/**
+	 * Restores previous transactions, if any. This happens if the application
+	 * has just been installed or the user wiped data. We do not want to do this
+	 * on every startup, rather, we want to do only when the database needs to
+	 * be initialized.
+	 */
+	private void restoreTransactions() {
+		if (!mBillingObserver.isTransactionsRestored()) {
+			BillingController.restoreTransactions(this);
+		}
+	}
+
+	/**
+	 * If we are registered, hide the ads
+	 */
+	private void hideAds() {
+		if (isRegistered) {
+			AdView adView = (AdView) findViewById(R.id.adView);
+
+			if (adView != null) {
+				adView.setVisibility(View.GONE);
+				adView.destroy();
+			}
+		}
+	}
+
 	@Override
 	public void onDestroy() {
 		try {
 			// Stop the tracker when it is no longer needed.
 			tracker.stopSession();
 		} catch (Exception e) { }
+
+		BillingController.unregisterObserver(mBillingObserver);
 
 		super.onDestroy();
 	}
@@ -298,6 +403,8 @@ public class CokeRewardsActivity extends Activity {
 		if (isLoggedIn()) {
 			getNumberOfPoints();
 		}
+
+		hideAds();
 	}
 
 	/**
@@ -365,6 +472,8 @@ public class CokeRewardsActivity extends Activity {
 
 			Intent register = new Intent(this, RegisterActivity.class);
 			startActivityForResult(register, REGISTER_REQUEST_CODE);
+		} else if (menuId == R.id.hideAds) {
+			BillingController.requestPurchase(CokeRewardsActivity.this, PRODUCT_ID, true /* confirm */, null);
 		}
 
 		return super.onMenuItemSelected(featureId, item);
@@ -375,6 +484,15 @@ public class CokeRewardsActivity extends Activity {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.menus, menu);
 		return true;
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		if (!supportBilling || isRegistered) {
+			menu.removeItem(R.id.hideAds);
+		}
+
+		return super.onPrepareOptionsMenu(menu);
 	}
 
 	@Override
