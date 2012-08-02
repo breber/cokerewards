@@ -48,11 +48,11 @@ public class RegisterActivity extends Activity {
 			if (CokeRewardsActivity.isLoggedIn(RegisterActivity.this)) {
 				RegisterActivity.this.finish();
 			} else {
-				SharedPreferences prefs = getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, 0);
+				SharedPreferences prefs = getSharedPreferences(Constants.PREFS_COKE_REWARDS, 0);
 				Editor edit = prefs.edit();
 
-				edit.remove(CokeRewardsActivity.EMAIL_ADDRESS);
-				edit.remove(CokeRewardsActivity.PASSWORD);
+				edit.remove(Constants.EMAIL_ADDRESS);
+				edit.remove(Constants.PASSWORD);
 				edit.commit();
 
 				Toast.makeText(RegisterActivity.this, "Error logging in. Please try again.", Toast.LENGTH_SHORT).show();
@@ -85,7 +85,6 @@ public class RegisterActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		setContentView(R.layout.login);
 
 		tracker = GoogleAnalyticsTracker.getInstance();
@@ -119,11 +118,11 @@ public class RegisterActivity extends Activity {
 			return;
 		}
 
-		SharedPreferences prefs = getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, 0);
+		SharedPreferences prefs = getSharedPreferences(Constants.PREFS_COKE_REWARDS, 0);
 		Editor edit = prefs.edit();
 
-		edit.putString(CokeRewardsActivity.EMAIL_ADDRESS, emailAddress);
-		edit.putString(CokeRewardsActivity.PASSWORD, password);
+		edit.putString(Constants.EMAIL_ADDRESS, emailAddress);
+		edit.putString(Constants.PASSWORD, password);
 		edit.commit();
 
 		new Thread(new Runnable() {

@@ -31,11 +31,11 @@ public class CokeRewardsRequest {
 	 */
 	@SuppressWarnings("unchecked")
 	public static Map<String, Object> createLoginRequestBody(Context ctx) {
-		SharedPreferences prefs = ctx.getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, 0);
+		SharedPreferences prefs = ctx.getSharedPreferences(Constants.PREFS_COKE_REWARDS, 0);
 
-		String emailAddress = prefs.getString(CokeRewardsActivity.EMAIL_ADDRESS, "");
-		String password = prefs.getString(CokeRewardsActivity.PASSWORD, "");
-		String screenName = prefs.getString(CokeRewardsActivity.SCREEN_NAME, "");
+		String emailAddress = prefs.getString(Constants.EMAIL_ADDRESS, "");
+		String password = prefs.getString(Constants.PASSWORD, "");
+		String screenName = prefs.getString(Constants.SCREEN_NAME, "");
 
 		try {
 			Map<String, Object> data = new HashMap<String, Object>();
@@ -66,11 +66,11 @@ public class CokeRewardsRequest {
 	 */
 	@SuppressWarnings("unchecked")
 	public static Map<String, Object> createCodeRequestBody(Context ctx, String code) {
-		SharedPreferences prefs = ctx.getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, 0);
+		SharedPreferences prefs = ctx.getSharedPreferences(Constants.PREFS_COKE_REWARDS, 0);
 
-		String emailAddress = prefs.getString(CokeRewardsActivity.EMAIL_ADDRESS, "");
-		String password = prefs.getString(CokeRewardsActivity.PASSWORD, "");
-		String screenName = prefs.getString(CokeRewardsActivity.SCREEN_NAME, "");
+		String emailAddress = prefs.getString(Constants.EMAIL_ADDRESS, "");
+		String password = prefs.getString(Constants.PASSWORD, "");
+		String screenName = prefs.getString(Constants.SCREEN_NAME, "");
 
 		try {
 			Map<String, Object> data = new HashMap<String, Object>();

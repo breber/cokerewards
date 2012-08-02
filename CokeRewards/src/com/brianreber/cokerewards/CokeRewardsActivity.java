@@ -41,59 +41,9 @@ import com.pontiflex.mobile.webview.sdk.IAdManager.RegistrationMode;
 public class CokeRewardsActivity extends Activity {
 
 	/**
-	 * The in-app purchase product id
-	 */
-	private static final String PRODUCT_ID = "hide_ads";
-
-	/**
-	 * SharedPreference name
-	 */
-	public static final String COKE_REWARDS = "CokeRewards";
-
-	/**
-	 * Email address preference key
-	 */
-	public static final String EMAIL_ADDRESS = "emailAddress";
-
-	/**
-	 * Password preference key
-	 */
-	public static final String PASSWORD = "password";
-
-	/**
-	 * Logged in state preference key
-	 */
-	public static final String LOGGED_IN = "loggedIn";
-
-	/**
-	 * Point count preference key
-	 */
-	public static final String POINTS = "points";
-
-	/**
-	 * Screen name preference key
-	 */
-	public static final String SCREEN_NAME = "screenName";
-
-	/**
-	 * Result of latest code entry
-	 */
-	public static final String ENTER_CODE_RESULT = "enterCodeResult";
-
-	/**
-	 * Result of latest code entry
-	 */
-	public static final String POINTS_EARNED_RESULT = "pointsEarnedResult";
-
-	/**
-	 * Result of messages
-	 */
-	public static final String MESSAGES = "messagesResult";
-
-	/**
 	 * Request code for starting our RegisterActivity
 	 */
-	private static final int REGISTER_REQUEST_CODE = 1000;
+	private static final int REGISTER_REQUEST_CODE = Math.abs(RegisterActivity.class.hashCode());
 
 	/**
 	 * LogCat tag
@@ -137,18 +87,18 @@ public class CokeRewardsActivity extends Activity {
 	private Runnable updateUIRunnable = new Runnable() {
 		@Override
 		public void run() {
-			SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, 0);
+			SharedPreferences prefs = getSharedPreferences(Constants.PREFS_COKE_REWARDS, 0);
 
 			if (dlg != null && dlg.isShowing()) {
 				dlg.dismiss();
 			}
 
 			TextView tv = (TextView) findViewById(R.id.numPoints);
-			tv.setText("Number of Points: " + prefs.getInt(POINTS, 0));
+			tv.setText("Number of Points: " + prefs.getInt(Constants.POINTS, 0));
 
 			tv = (TextView) findViewById(R.id.screenName);
-			String name = ("".equals(prefs.getString(SCREEN_NAME, "")) ?
-					prefs.getString(EMAIL_ADDRESS, "") : prefs.getString(SCREEN_NAME, ""));
+			String name = ("".equals(prefs.getString(Constants.SCREEN_NAME, "")) ?
+					prefs.getString(Constants.EMAIL_ADDRESS, "") : prefs.getString(Constants.SCREEN_NAME, ""));
 
 			tv.setText("Welcome " + name + "!");
 		}
@@ -161,24 +111,24 @@ public class CokeRewardsActivity extends Activity {
 	private Runnable codeUpdateRunnable = new Runnable() {
 		@Override
 		public void run() {
-			SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, 0);
+			SharedPreferences prefs = getSharedPreferences(Constants.PREFS_COKE_REWARDS, 0);
 
 			if (dlg != null && dlg.isShowing()) {
 				dlg.dismiss();
 			}
 
-			if (prefs.getBoolean(ENTER_CODE_RESULT, false)) {
+			if (prefs.getBoolean(Constants.ENTER_CODE_RESULT, false)) {
 				EditText tv = (EditText) findViewById(R.id.code);
 				tv.setText("");
 
-				int numPointsEarned = prefs.getInt(POINTS_EARNED_RESULT, 0);
+				int numPointsEarned = prefs.getInt(Constants.POINTS_EARNED_RESULT, 0);
 				Toast.makeText(getApplicationContext(), "Code submitted successfully. " + numPointsEarned + " points earned!", Toast.LENGTH_SHORT).show();
 
 				try {
 					tracker.trackEvent("SuccessfulCode", "SuccessfulCode", "SuccessfulCodeSubmission", 0);
 				} catch (Exception e) { }
 			} else {
-				String messages = prefs.getString(MESSAGES, "");
+				String messages = prefs.getString(Constants.MESSAGES, "");
 				Toast.makeText(getApplicationContext(), "Code submission failed..." + messages, Toast.LENGTH_SHORT).show();
 
 				try {
@@ -205,52 +155,46 @@ public class CokeRewardsActivity extends Activity {
 	};
 
 
-	/**
-	 * Set up the basic UI elements
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
 	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 
+		// Set up all the in-app billing stuff
 		setupInAppBilling();
 
-		if (isLoggedIn() && !isRegistered) {
-			IAdManager adManager = AdManagerFactory.createInstance(getApplication());
-			IAdConfig adConfig = adManager.getAdConfig();
-			adConfig.setWithRegistration(true);
-			adConfig.setLaunchInterval(3);
-			adConfig.setRegistrationMode(RegistrationMode.RegistrationAfterIntervalInLaunches);
-			adManager.showAd(adConfig);
-		}
-
-		tracker = GoogleAnalyticsTracker.getInstance();
-
 		// Start the tracker in manual dispatch mode...
+		tracker = GoogleAnalyticsTracker.getInstance();
 		tracker.startNewSession("UA-3673402-16", 20, this);
 		tracker.setAnonymizeIp(true);
 
+		// If we are logged in, refresh the point count, and show an ad if the user
+		// hasn't purchased the app
+		if (isLoggedIn()) {
+			getNumberOfPoints();
+			handler.post(updateUIRunnable);
+
+			if (!isRegistered) {
+				IAdManager adManager = AdManagerFactory.createInstance(getApplication());
+				IAdConfig adConfig = adManager.getAdConfig();
+				adConfig.setWithRegistration(true);
+				adConfig.setLaunchInterval(4);
+				adConfig.setRegistrationMode(RegistrationMode.RegistrationAfterIntervalInLaunches);
+				adManager.showAd(adConfig);
+			}
+		} else {
+			// If the user isn't logged in, bring them to the register activity
+			Intent register = new Intent(this, RegisterActivity.class);
+			startActivityForResult(register, REGISTER_REQUEST_CODE);
+		}
+
+		// Set up the submitting dialog box so it is ready when we need it
 		dlg = new ProgressDialog(this);
 		dlg.setCancelable(false);
 		dlg.setMessage(getResources().getText(R.string.submitting));
-
-		SharedPreferences prefs = getSharedPreferences(COKE_REWARDS, 0);
-		TextView tv = (TextView) findViewById(R.id.numPoints);
-
-		try {
-			tv.setText("Number of Points: " + prefs.getInt(POINTS, 0));
-		} catch (ClassCastException ex) {
-			try {
-				tv.setText("Number of Points: " + prefs.getString(POINTS, ""));
-			} catch (Exception e) {	}
-			getNumberOfPoints();
-		}
-
-		tv = (TextView) findViewById(R.id.screenName);
-		String name = ("".equals(prefs.getString(SCREEN_NAME, "")) ?
-				prefs.getString(EMAIL_ADDRESS, "") : prefs.getString(SCREEN_NAME, ""));
-
-		tv.setText("Welcome " + name + "!");
 
 		Button submitCode = (Button) findViewById(R.id.submitCode);
 		submitCode.setOnClickListener(new OnClickListener() {
@@ -274,16 +218,9 @@ public class CokeRewardsActivity extends Activity {
 					public void run() {
 						try {
 							tracker.trackEvent("Button", "SubmitCode", "Submit Code button clicked", 0);
-							try {
-								Map<String, Object> result = CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, finalCode);
-								parseResult(CokeRewardsActivity.this, codeUpdateRunnable, result);
-							} catch (Exception e) {
-								tracker.trackEvent("Exception", "ExceptionSecureSubmitCode", "Submit Code encountered an exception: " + e.getMessage(), 0);
-								e.printStackTrace();
 
-								Map<String, Object> result = CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, finalCode);
-								parseResult(CokeRewardsActivity.this, codeUpdateRunnable, result);
-							}
+							Map<String, Object> result = CokeRewardsRequest.createCodeRequestBody(CokeRewardsActivity.this, finalCode);
+							parseResult(CokeRewardsActivity.this, codeUpdateRunnable, result);
 						} catch (Exception e) {
 							try {
 								tracker.trackEvent("Exception", "ExceptionSubmitCode", "Submit Code encountered an exception: " + e.getMessage(), 0);
@@ -306,13 +243,6 @@ public class CokeRewardsActivity extends Activity {
 				startActivityForResult(i, REGISTER_REQUEST_CODE);
 			}
 		});
-
-		if (isLoggedIn()) {
-			getNumberOfPoints();
-		} else {
-			Intent register = new Intent(this, RegisterActivity.class);
-			startActivityForResult(register, REGISTER_REQUEST_CODE);
-		}
 	}
 
 	/**
@@ -335,7 +265,7 @@ public class CokeRewardsActivity extends Activity {
 			@Override
 			public void onPurchaseStateChanged(String itemId, PurchaseState state) {
 				Log.i(TAG, "onPurchaseStateChanged() itemId: " + itemId + " --> " + state);
-				isRegistered = BillingController.isPurchased(CokeRewardsActivity.this, PRODUCT_ID);
+				isRegistered = BillingController.isPurchased(CokeRewardsActivity.this, Constants.PRODUCT_ID);
 
 				hideAds();
 			}
@@ -354,7 +284,7 @@ public class CokeRewardsActivity extends Activity {
 		BillingController.registerObserver(mBillingObserver);
 		BillingController.checkBillingSupported(this);
 
-		isRegistered = BillingController.isPurchased(CokeRewardsActivity.this, PRODUCT_ID);
+		isRegistered = BillingController.isPurchased(CokeRewardsActivity.this, Constants.PRODUCT_ID);
 		hideAds();
 	}
 
@@ -384,6 +314,9 @@ public class CokeRewardsActivity extends Activity {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onDestroy()
+	 */
 	@Override
 	public void onDestroy() {
 		try {
@@ -396,6 +329,9 @@ public class CokeRewardsActivity extends Activity {
 		super.onDestroy();
 	}
 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onResume()
+	 */
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -416,16 +352,9 @@ public class CokeRewardsActivity extends Activity {
 			public void run() {
 				try {
 					tracker.trackEvent("CountFetch", "CountFetch", "Fetched number of points", 0);
-					try {
-						Map<String, Object> result = CokeRewardsRequest.createLoginRequestBody(CokeRewardsActivity.this);
-						parseResult(CokeRewardsActivity.this, updateUIRunnable, result);
-					} catch (Exception e) {
-						tracker.trackEvent("Exception", "ExceptionSecureGetNumPoints", "Get number of points encountered an exception: " + e.getMessage(), 0);
-						e.printStackTrace();
 
-						Map<String, Object> result = CokeRewardsRequest.createLoginRequestBody(CokeRewardsActivity.this);
-						parseResult(CokeRewardsActivity.this, updateUIRunnable, result);
-					}
+					Map<String, Object> result = CokeRewardsRequest.createLoginRequestBody(CokeRewardsActivity.this);
+					parseResult(CokeRewardsActivity.this, updateUIRunnable, result);
 				} catch (Exception e) {
 					try {
 						tracker.trackEvent("Exception", "ExceptionGetNumPoints", "Get number of points encountered an exception: " + e.getMessage(), 0);
@@ -455,16 +384,21 @@ public class CokeRewardsActivity extends Activity {
 	 * logged in with the most recent request
 	 */
 	public static boolean isLoggedIn(Context ctx) {
-		SharedPreferences prefs = ctx.getSharedPreferences(COKE_REWARDS, 0);
-		return prefs.contains(EMAIL_ADDRESS) && prefs.contains(PASSWORD) && prefs.getBoolean(LOGGED_IN, false);
+		SharedPreferences prefs = ctx.getSharedPreferences(Constants.PREFS_COKE_REWARDS, 0);
+		return prefs.contains(Constants.EMAIL_ADDRESS) &&
+				prefs.contains(Constants.PASSWORD) &&
+				prefs.getBoolean(Constants.LOGGED_IN, false);
 	}
 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onMenuItemSelected(int, android.view.MenuItem)
+	 */
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		int menuId = item.getItemId();
 
 		if (menuId == R.id.logout) {
-			SharedPreferences prefs = getSharedPreferences(CokeRewardsActivity.COKE_REWARDS, 0);
+			SharedPreferences prefs = getSharedPreferences(Constants.PREFS_COKE_REWARDS, 0);
 			Editor edit = prefs.edit();
 
 			edit.clear();
@@ -473,12 +407,15 @@ public class CokeRewardsActivity extends Activity {
 			Intent register = new Intent(this, RegisterActivity.class);
 			startActivityForResult(register, REGISTER_REQUEST_CODE);
 		} else if (menuId == R.id.hideAds) {
-			BillingController.requestPurchase(CokeRewardsActivity.this, PRODUCT_ID, true /* confirm */, null);
+			BillingController.requestPurchase(CokeRewardsActivity.this, Constants.PRODUCT_ID, true, null);
 		}
 
 		return super.onMenuItemSelected(featureId, item);
 	}
 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
@@ -486,8 +423,13 @@ public class CokeRewardsActivity extends Activity {
 		return true;
 	}
 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onPrepareOptionsMenu(android.view.Menu)
+	 */
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
+		// If billing isn't supported or the user has already
+		// purchased the app, hid the menu button
 		if (!supportBilling || isRegistered) {
 			menu.removeItem(R.id.hideAds);
 		}
@@ -495,6 +437,9 @@ public class CokeRewardsActivity extends Activity {
 		return super.onPrepareOptionsMenu(menu);
 	}
 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onActivityResult(int, int, android.content.Intent)
+	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -509,40 +454,48 @@ public class CokeRewardsActivity extends Activity {
 	/**
 	 * Make a server request and update preferences accordingly.
 	 * 
-	 * @param postValue The value to POST to the server
+	 * @param ctx The application context
 	 * @param runnable The Runnable to start after we are done processing
+	 * @param data The data received from the server
 	 */
 	public static void parseResult(Context ctx, Runnable runnable, Map<String, Object> data) {
-		SharedPreferences prefs = ctx.getSharedPreferences(COKE_REWARDS, 0);
+		final String RESULT_POINTS        = "POINTS";
+		final String RESULT_LOGIN         = "LOGIN_RESULT";
+		final String RESULT_SCREEN_NAME   = "SCREEN_NAME";
+		final String RESULT_ENTER_CODE    = "ENTER_CODE_RESULT";
+		final String RESULT_POINTS_EARNED = "POINTS_EARNED";
+		final String RESULT_MESSAGES      = "MESSAGES";
+
+		SharedPreferences prefs = ctx.getSharedPreferences(Constants.PREFS_COKE_REWARDS, 0);
 		Editor edit = prefs.edit();
 
-		if (data.containsKey("POINTS")) {
-			edit.putInt(POINTS, (Integer) data.get("POINTS"));
+		if (data.containsKey(RESULT_POINTS)) {
+			edit.putInt(Constants.POINTS, (Integer) data.get(RESULT_POINTS));
 		}
 
-		if (data.containsKey("LOGIN_RESULT")) {
-			edit.putBoolean(LOGGED_IN, Boolean.parseBoolean((String) data.get("LOGIN_RESULT")));
+		if (data.containsKey(RESULT_LOGIN)) {
+			edit.putBoolean(Constants.LOGGED_IN, Boolean.parseBoolean((String) data.get(RESULT_LOGIN)));
 		}
 
-		if (data.containsKey("SCREEN_NAME")) {
-			String screenName = (String) data.get("SCREEN_NAME");
+		if (data.containsKey(RESULT_SCREEN_NAME)) {
+			String screenName = (String) data.get(RESULT_SCREEN_NAME);
 
 			if (screenName != null && !"".equals(screenName)) {
-				edit.putString(SCREEN_NAME, screenName);
+				edit.putString(Constants.SCREEN_NAME, screenName);
 			}
 		}
 
-		if (data.containsKey("ENTER_CODE_RESULT")) {
-			edit.putBoolean(ENTER_CODE_RESULT, Boolean.parseBoolean((String) data.get("ENTER_CODE_RESULT")));
+		if (data.containsKey(RESULT_ENTER_CODE)) {
+			edit.putBoolean(Constants.ENTER_CODE_RESULT, Boolean.parseBoolean((String) data.get(RESULT_ENTER_CODE)));
 		}
 
-		if (data.containsKey("POINTS_EARNED")) {
-			edit.putInt(POINTS_EARNED_RESULT, (Integer) data.get("POINTS_EARNED"));
+		if (data.containsKey(RESULT_POINTS_EARNED)) {
+			edit.putInt(Constants.POINTS_EARNED_RESULT, (Integer) data.get(RESULT_POINTS_EARNED));
 		}
 
-		if (data.containsKey("MESSAGES")) {
-			String messages = (String) ((Object[]) data.get("MESSAGES"))[0];
-			edit.putString(MESSAGES, messages);
+		if (data.containsKey(RESULT_MESSAGES)) {
+			String messages = (String) ((Object[]) data.get(RESULT_MESSAGES))[0];
+			edit.putString(Constants.MESSAGES, messages);
 		}
 
 		edit.commit();
