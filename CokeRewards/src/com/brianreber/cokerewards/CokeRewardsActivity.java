@@ -28,10 +28,6 @@ import android.widget.Toast;
 
 import com.google.ads.AdView;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
-import com.pontiflex.mobile.webview.sdk.AdManagerFactory;
-import com.pontiflex.mobile.webview.sdk.IAdConfig;
-import com.pontiflex.mobile.webview.sdk.IAdManager;
-import com.pontiflex.mobile.webview.sdk.IAdManager.RegistrationMode;
 
 /**
  * Main activity for the app
@@ -176,15 +172,6 @@ public class CokeRewardsActivity extends Activity {
 		if (isLoggedIn()) {
 			getNumberOfPoints();
 			handler.post(updateUIRunnable);
-
-			if (!isRegistered) {
-				IAdManager adManager = AdManagerFactory.createInstance(getApplication());
-				IAdConfig adConfig = adManager.getAdConfig();
-				adConfig.setWithRegistration(true);
-				adConfig.setLaunchInterval(4);
-				adConfig.setRegistrationMode(RegistrationMode.RegistrationAfterIntervalInLaunches);
-				adManager.showAd(adConfig);
-			}
 		} else {
 			// If the user isn't logged in, bring them to the register activity
 			Intent register = new Intent(this, RegisterActivity.class);

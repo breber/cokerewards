@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.brianreber.cokerewards"
     android:installLocation="auto"
-    android:versionCode="25"
-    android:versionName="1.2.3" >
+    android:versionCode="26"
+    android:versionName="1.2.4" >
 
     <uses-sdk
         android:minSdkVersion="7"
@@ -48,10 +48,6 @@
             android:name="com.google.ads.AdActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
         <activity android:name="com.mobfox.sdk.InAppWebView" />
-        <activity android:name="com.pontiflex.mobile.webview.sdk.activities.MultiOfferActivity" />
-        <activity
-            android:name="com.pontiflex.mobile.webview.sdk.activities.RegistrationActivity"
-            android:configChanges="keyboardHidden" />
     </application>
 
 </manifest>
