@@ -25,6 +25,9 @@ namespace CokeRewards
         {
             string username = Username.Text;
             string password = Password.Password;
+
+            // TODO: remove this
+            Console.Write("Username: " + username + ", Password: " + password);
         }
     }
 }
