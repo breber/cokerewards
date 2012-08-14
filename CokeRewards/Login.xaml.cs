@@ -13,25 +13,22 @@ using Microsoft.Phone.Controls;
 
 namespace CokeRewards
 {
-    public partial class MainPage : PhoneApplicationPage
+    public partial class Login : PhoneApplicationPage
     {
-        // Constructor
-        public MainPage()
+        public Login()
         {
             InitializeComponent();
-
-            if (/* !loggedIn*/ false)
-            {
-                NavigationService.Navigate(new Uri("/Login.xaml"));
-            }
         }
 
-        private void submitCodeButton_Click(object sender, RoutedEventArgs e)
+        private void loginButton_Click(object sender, RoutedEventArgs e)
         {
-            string code = Code.Text;
+            string username = Username.Text;
+            string password = Password.Password;
 
             // TODO: remove this
-            Console.Write("Code: " + code);
+            Console.Write("Username: " + username + ", Password: " + password);
+
+            NavigationService.Navigate(new Uri("/MainPage.xaml"));
         }
     }
 }
