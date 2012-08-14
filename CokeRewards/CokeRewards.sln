@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010 Express for Windows Phone
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CokeRewards", "CokeRewards\CokeRewards.csproj", "{1FCE391C-3EE4-45D5-84A5-F9C00A2DFAA0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CokeRewards", "CokeRewards.csproj", "{1FCE391C-3EE4-45D5-84A5-F9C00A2DFAA0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

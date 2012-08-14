@@ -19,6 +19,11 @@ namespace CokeRewards
         public MainPage()
         {
             InitializeComponent();
+
+            if (/* !loggedIn*/ false)
+            {
+                NavigationService.Navigate(new Uri("/Login.xaml"));
+            }
         }
 
         private void loginButton_Click(object sender, RoutedEventArgs e)
