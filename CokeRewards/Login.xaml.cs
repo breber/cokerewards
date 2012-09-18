@@ -11,6 +11,8 @@ using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
 
+using CookComputing.XmlRpc;
+
 namespace CokeRewards
 {
     public partial class Login : PhoneApplicationPage
@@ -24,9 +26,12 @@ namespace CokeRewards
         {
             string username = Username.Text;
             string password = Password.Password;
-
+            
             // TODO: remove this
             Console.Write("Username: " + username + ", Password: " + password);
+
+            IGetPoints proxy = XmlRpcProxyGen.Create<IGetPoints>();
+
 
             NavigationService.Navigate(new Uri("/MainPage.xaml"));
         }
