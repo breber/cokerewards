@@ -1,6 +1,0 @@
-[submodule "CokeRewards/external"]
-	path = CokeRewards/external
-	url = https://github.com/timroes/aXMLRPC.git
-[submodule "AndroidBillingLibrary"]
-	path = AndroidBillingLibrary
-	url = git://github.com/robotmedia/AndroidBillingLibrary.git
