@@ -7,8 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "XMLRPC.h"
 
-@interface LoginViewController : UIViewController {
+@interface LoginViewController : UIViewController <XMLRPCConnectionDelegate> {
     IBOutlet UITextField *username;
     IBOutlet UITextField *password;
 }

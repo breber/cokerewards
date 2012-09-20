@@ -13,8 +13,11 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tLP-af-s5p">
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="73" id="Gpc-cK-5lP"/>
+                                </constraints>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                                <state key="normal" title="Button">
+                                <state key="normal" title="Login">
                                     <color key="titleColor" red="0.19607843459999999" green="0.30980393290000002" blue="0.52156865600000002" alpha="1" colorSpace="calibratedRGB"/>
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -35,21 +38,27 @@
                             </label>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Username" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="dBk-1U-tNd">
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" autocorrectionType="no"/>
+                                <textInputTraits key="textInputTraits" autocorrectionType="no" keyboardType="emailAddress"/>
+                                <connections>
+                                    <outlet property="delegate" destination="2" id="V9s-Qs-3pW"/>
+                                </connections>
                             </textField>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Password" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="rUI-qw-K5C">
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" secureTextEntry="YES"/>
+                                <connections>
+                                    <outlet property="delegate" destination="2" id="oWi-LO-m7b"/>
+                                </connections>
                             </textField>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="dBk-1U-tNd" secondAttribute="trailing" constant="20" symbolic="YES" type="default" id="2Gh-tb-c68"/>
+                            <constraint firstItem="tLP-af-s5p" firstAttribute="top" secondItem="3" secondAttribute="top" constant="193" id="5ag-Ee-eQG"/>
                             <constraint firstItem="hJS-vA-dLJ" firstAttribute="top" secondItem="3" secondAttribute="top" constant="20" symbolic="YES" type="default" id="DyT-CQ-Dcg"/>
+                            <constraint firstItem="dBk-1U-tNd" firstAttribute="top" secondItem="3" secondAttribute="top" constant="108" id="N6y-8r-cyf"/>
                             <constraint firstAttribute="trailing" secondItem="hJS-vA-dLJ" secondAttribute="trailing" constant="20" symbolic="YES" type="default" id="Oyx-JV-0aY"/>
-                            <constraint firstAttribute="bottom" secondItem="tLP-af-s5p" secondAttribute="bottom" constant="203" id="RId-Ls-pKE"/>
                             <constraint firstItem="tLP-af-s5p" firstAttribute="centerX" secondItem="rUI-qw-K5C" secondAttribute="centerX" type="default" id="RJR-M1-kI3"/>
-                            <constraint firstItem="dBk-1U-tNd" firstAttribute="top" secondItem="3" secondAttribute="top" constant="136" id="cXg-rW-6nw"/>
                             <constraint firstItem="hJS-vA-dLJ" firstAttribute="leading" secondItem="3" secondAttribute="leading" constant="20" symbolic="YES" type="default" id="f6P-un-Mx1"/>
                             <constraint firstAttribute="trailing" secondItem="rUI-qw-K5C" secondAttribute="trailing" constant="20" symbolic="YES" type="default" id="huO-sy-9W2"/>
                             <constraint firstItem="rUI-qw-K5C" firstAttribute="leading" secondItem="3" secondAttribute="leading" constant="20" symbolic="YES" type="default" id="qZ8-zC-pOY"/>
