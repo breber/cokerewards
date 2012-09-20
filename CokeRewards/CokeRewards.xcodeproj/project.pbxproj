@@ -21,9 +21,10 @@
 		D1289338160B687A00E646FB /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1289337160B687A00E646FB /* LoginViewController.m */; };
 		D128933F160B694200E646FB /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D128933E160B694200E646FB /* Security.framework */; };
 		D1289342160B69B600E646FB /* KeychainItemWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = D1289341160B69B600E646FB /* KeychainItemWrapper.m */; };
-		D1C2AF93160B7A5D005E719C /* libXMLRPC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1C2AF92160B7A5D005E719C /* libXMLRPC.a */; };
-		D1C2AFA8160B7F5C005E719C /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = D1C2AFA5160B7F5C005E719C /* NSData+Base64.m */; };
-		D1C2AFA9160B7F5C005E719C /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = D1C2AFA7160B7F5C005E719C /* NSStringAdditions.m */; };
+		D1C2AFAC160BA0DC005E719C /* CokeRewardsRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = D1C2AFAB160BA0DC005E719C /* CokeRewardsRequest.m */; };
+		D1C2AFBD160BA10F005E719C /* libXMLRPC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1C2AFBC160BA10F005E719C /* libXMLRPC.a */; };
+		D1C2AFC2160BA135005E719C /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = D1C2AFBF160BA135005E719C /* NSData+Base64.m */; };
+		D1C2AFC3160BA135005E719C /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = D1C2AFC1160BA135005E719C /* NSStringAdditions.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,24 +48,26 @@
 		D128933E160B694200E646FB /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		D1289340160B69B600E646FB /* KeychainItemWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KeychainItemWrapper.h; sourceTree = "<group>"; };
 		D1289341160B69B600E646FB /* KeychainItemWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KeychainItemWrapper.m; sourceTree = "<group>"; };
-		D1C2AF92160B7A5D005E719C /* libXMLRPC.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libXMLRPC.a; sourceTree = "<group>"; };
-		D1C2AF95160B7A70005E719C /* NSData+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Base64.h"; sourceTree = "<group>"; };
-		D1C2AF96160B7A70005E719C /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSStringAdditions.h; sourceTree = "<group>"; };
-		D1C2AF97160B7A70005E719C /* XMLRPC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPC.h; sourceTree = "<group>"; };
-		D1C2AF98160B7A70005E719C /* XMLRPC.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPC.pch; sourceTree = "<group>"; };
-		D1C2AF99160B7A70005E719C /* XMLRPCConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPCConnection.h; sourceTree = "<group>"; };
-		D1C2AF9A160B7A70005E719C /* XMLRPCConnectionDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPCConnectionDelegate.h; sourceTree = "<group>"; };
-		D1C2AF9B160B7A70005E719C /* XMLRPCConnectionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPCConnectionManager.h; sourceTree = "<group>"; };
-		D1C2AF9C160B7A70005E719C /* XMLRPCDefaultEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPCDefaultEncoder.h; sourceTree = "<group>"; };
-		D1C2AF9D160B7A70005E719C /* XMLRPCEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPCEncoder.h; sourceTree = "<group>"; };
-		D1C2AF9E160B7A70005E719C /* XMLRPCEventBasedParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPCEventBasedParser.h; sourceTree = "<group>"; };
-		D1C2AF9F160B7A70005E719C /* XMLRPCEventBasedParserDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPCEventBasedParserDelegate.h; sourceTree = "<group>"; };
-		D1C2AFA0160B7A70005E719C /* XMLRPCRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPCRequest.h; sourceTree = "<group>"; };
-		D1C2AFA1160B7A70005E719C /* XMLRPCResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPCResponse.h; sourceTree = "<group>"; };
-		D1C2AFA4160B7F5C005E719C /* NSData+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Base64.h"; sourceTree = "<group>"; };
-		D1C2AFA5160B7F5C005E719C /* NSData+Base64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Base64.m"; sourceTree = "<group>"; };
-		D1C2AFA6160B7F5C005E719C /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSStringAdditions.h; sourceTree = "<group>"; };
-		D1C2AFA7160B7F5C005E719C /* NSStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSStringAdditions.m; sourceTree = "<group>"; };
+		D1C2AFAA160BA0DC005E719C /* CokeRewardsRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CokeRewardsRequest.h; sourceTree = "<group>"; };
+		D1C2AFAB160BA0DC005E719C /* CokeRewardsRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CokeRewardsRequest.m; sourceTree = "<group>"; };
+		D1C2AFAF160BA10F005E719C /* NSData+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Base64.h"; sourceTree = "<group>"; };
+		D1C2AFB0160BA10F005E719C /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSStringAdditions.h; sourceTree = "<group>"; };
+		D1C2AFB1160BA10F005E719C /* XMLRPC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPC.h; sourceTree = "<group>"; };
+		D1C2AFB2160BA10F005E719C /* XMLRPC.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPC.pch; sourceTree = "<group>"; };
+		D1C2AFB3160BA10F005E719C /* XMLRPCConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPCConnection.h; sourceTree = "<group>"; };
+		D1C2AFB4160BA10F005E719C /* XMLRPCConnectionDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPCConnectionDelegate.h; sourceTree = "<group>"; };
+		D1C2AFB5160BA10F005E719C /* XMLRPCConnectionManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPCConnectionManager.h; sourceTree = "<group>"; };
+		D1C2AFB6160BA10F005E719C /* XMLRPCDefaultEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPCDefaultEncoder.h; sourceTree = "<group>"; };
+		D1C2AFB7160BA10F005E719C /* XMLRPCEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPCEncoder.h; sourceTree = "<group>"; };
+		D1C2AFB8160BA10F005E719C /* XMLRPCEventBasedParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPCEventBasedParser.h; sourceTree = "<group>"; };
+		D1C2AFB9160BA10F005E719C /* XMLRPCEventBasedParserDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPCEventBasedParserDelegate.h; sourceTree = "<group>"; };
+		D1C2AFBA160BA10F005E719C /* XMLRPCRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPCRequest.h; sourceTree = "<group>"; };
+		D1C2AFBB160BA10F005E719C /* XMLRPCResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XMLRPCResponse.h; sourceTree = "<group>"; };
+		D1C2AFBC160BA10F005E719C /* libXMLRPC.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libXMLRPC.a; sourceTree = "<group>"; };
+		D1C2AFBE160BA135005E719C /* NSData+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSData+Base64.h"; path = "CokeRewards/Additions/NSData+Base64.h"; sourceTree = "<group>"; };
+		D1C2AFBF160BA135005E719C /* NSData+Base64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSData+Base64.m"; path = "CokeRewards/Additions/NSData+Base64.m"; sourceTree = "<group>"; };
+		D1C2AFC0160BA135005E719C /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSStringAdditions.h; path = CokeRewards/Additions/NSStringAdditions.h; sourceTree = "<group>"; };
+		D1C2AFC1160BA135005E719C /* NSStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSStringAdditions.m; path = CokeRewards/Additions/NSStringAdditions.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,7 +79,7 @@
 				D1289319160B687A00E646FB /* UIKit.framework in Frameworks */,
 				D128931B160B687A00E646FB /* Foundation.framework in Frameworks */,
 				D128931D160B687A00E646FB /* CoreGraphics.framework in Frameworks */,
-				D1C2AF93160B7A5D005E719C /* libXMLRPC.a in Frameworks */,
+				D1C2AFBD160BA10F005E719C /* libXMLRPC.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,6 +90,7 @@
 			isa = PBXGroup;
 			children = (
 				D1C2AFA3160B7F50005E719C /* Additions */,
+				D1C2AFAD160BA10F005E719C /* XMLRPC */,
 				D128931E160B687A00E646FB /* CokeRewards */,
 				D1289317160B687A00E646FB /* Frameworks */,
 				D1289315160B687A00E646FB /* Products */,
@@ -104,8 +108,6 @@
 		D1289317160B687A00E646FB /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				D1C2AF94160B7A70005E719C /* headers */,
-				D1C2AF92160B7A5D005E719C /* libXMLRPC.a */,
 				D128933E160B694200E646FB /* Security.framework */,
 				D1289318160B687A00E646FB /* UIKit.framework */,
 				D128931A160B687A00E646FB /* Foundation.framework */,
@@ -119,6 +121,8 @@
 			children = (
 				D1289327160B687A00E646FB /* AppDelegate.h */,
 				D1289328160B687A00E646FB /* AppDelegate.m */,
+				D1C2AFAA160BA0DC005E719C /* CokeRewardsRequest.h */,
+				D1C2AFAB160BA0DC005E719C /* CokeRewardsRequest.m */,
 				D1289340160B69B600E646FB /* KeychainItemWrapper.h */,
 				D1289341160B69B600E646FB /* KeychainItemWrapper.m */,
 				D1289330160B687A00E646FB /* MainStoryboard_iPhone.storyboard */,
@@ -144,35 +148,45 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		D1C2AF94160B7A70005E719C /* headers */ = {
-			isa = PBXGroup;
-			children = (
-				D1C2AF95160B7A70005E719C /* NSData+Base64.h */,
-				D1C2AF96160B7A70005E719C /* NSStringAdditions.h */,
-				D1C2AF97160B7A70005E719C /* XMLRPC.h */,
-				D1C2AF98160B7A70005E719C /* XMLRPC.pch */,
-				D1C2AF99160B7A70005E719C /* XMLRPCConnection.h */,
-				D1C2AF9A160B7A70005E719C /* XMLRPCConnectionDelegate.h */,
-				D1C2AF9B160B7A70005E719C /* XMLRPCConnectionManager.h */,
-				D1C2AF9C160B7A70005E719C /* XMLRPCDefaultEncoder.h */,
-				D1C2AF9D160B7A70005E719C /* XMLRPCEncoder.h */,
-				D1C2AF9E160B7A70005E719C /* XMLRPCEventBasedParser.h */,
-				D1C2AF9F160B7A70005E719C /* XMLRPCEventBasedParserDelegate.h */,
-				D1C2AFA0160B7A70005E719C /* XMLRPCRequest.h */,
-				D1C2AFA1160B7A70005E719C /* XMLRPCResponse.h */,
-			);
-			path = headers;
-			sourceTree = "<group>";
-		};
 		D1C2AFA3160B7F50005E719C /* Additions */ = {
 			isa = PBXGroup;
 			children = (
-				D1C2AFA4160B7F5C005E719C /* NSData+Base64.h */,
-				D1C2AFA5160B7F5C005E719C /* NSData+Base64.m */,
-				D1C2AFA6160B7F5C005E719C /* NSStringAdditions.h */,
-				D1C2AFA7160B7F5C005E719C /* NSStringAdditions.m */,
+				D1C2AFBE160BA135005E719C /* NSData+Base64.h */,
+				D1C2AFBF160BA135005E719C /* NSData+Base64.m */,
+				D1C2AFC0160BA135005E719C /* NSStringAdditions.h */,
+				D1C2AFC1160BA135005E719C /* NSStringAdditions.m */,
 			);
 			name = Additions;
+			sourceTree = "<group>";
+		};
+		D1C2AFAD160BA10F005E719C /* XMLRPC */ = {
+			isa = PBXGroup;
+			children = (
+				D1C2AFAE160BA10F005E719C /* headers */,
+				D1C2AFBC160BA10F005E719C /* libXMLRPC.a */,
+			);
+			name = XMLRPC;
+			path = CokeRewards/XMLRPC;
+			sourceTree = "<group>";
+		};
+		D1C2AFAE160BA10F005E719C /* headers */ = {
+			isa = PBXGroup;
+			children = (
+				D1C2AFAF160BA10F005E719C /* NSData+Base64.h */,
+				D1C2AFB0160BA10F005E719C /* NSStringAdditions.h */,
+				D1C2AFB1160BA10F005E719C /* XMLRPC.h */,
+				D1C2AFB2160BA10F005E719C /* XMLRPC.pch */,
+				D1C2AFB3160BA10F005E719C /* XMLRPCConnection.h */,
+				D1C2AFB4160BA10F005E719C /* XMLRPCConnectionDelegate.h */,
+				D1C2AFB5160BA10F005E719C /* XMLRPCConnectionManager.h */,
+				D1C2AFB6160BA10F005E719C /* XMLRPCDefaultEncoder.h */,
+				D1C2AFB7160BA10F005E719C /* XMLRPCEncoder.h */,
+				D1C2AFB8160BA10F005E719C /* XMLRPCEventBasedParser.h */,
+				D1C2AFB9160BA10F005E719C /* XMLRPCEventBasedParserDelegate.h */,
+				D1C2AFBA160BA10F005E719C /* XMLRPCRequest.h */,
+				D1C2AFBB160BA10F005E719C /* XMLRPCResponse.h */,
+			);
+			path = headers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -246,8 +260,9 @@
 				D1289329160B687A00E646FB /* AppDelegate.m in Sources */,
 				D1289338160B687A00E646FB /* LoginViewController.m in Sources */,
 				D1289342160B69B600E646FB /* KeychainItemWrapper.m in Sources */,
-				D1C2AFA8160B7F5C005E719C /* NSData+Base64.m in Sources */,
-				D1C2AFA9160B7F5C005E719C /* NSStringAdditions.m in Sources */,
+				D1C2AFAC160BA0DC005E719C /* CokeRewardsRequest.m in Sources */,
+				D1C2AFC2160BA135005E719C /* NSData+Base64.m in Sources */,
+				D1C2AFC3160BA135005E719C /* NSStringAdditions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -345,6 +360,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/CokeRewards/XMLRPC\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
@@ -364,6 +380,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/CokeRewards/XMLRPC\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
