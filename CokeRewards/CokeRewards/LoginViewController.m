@@ -7,12 +7,11 @@
 //
 
 #import "LoginViewController.h"
-#import "KeychainItemWrapper.h"
-#import "XMLRPC.h"
+#import "CokeRewardsRequest.h"
 
-@interface LoginViewController () {
-    KeychainItemWrapper *keychainItem;
-}
+@interface LoginViewController ()
+
+@property(nonatomic) CokeRewardsRequest *cokeRewards;
 
 @end
 
@@ -22,55 +21,25 @@
 {
     [super viewDidLoad];
     
-    keychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:@"CokeRewards" accessGroup:nil];
-
-    NSString *passwordText = [keychainItem objectForKey:(__bridge id)(kSecValueData)];
-    NSString *usernameText = [keychainItem objectForKey:(__bridge id)(kSecAttrAccount)];
+    self.cokeRewards = [CokeRewardsRequest sharedInstance];
+    self.cokeRewards.delegate = self;
     
-    NSLog(@"Username: %@ Password: %@", usernameText, passwordText);
-    
-    if (![@"" isEqualToString:usernameText] && ![@"" isEqualToString:passwordText]) {
-        [self loginButtonPressed:self];
+    if ([self.cokeRewards isLoggedIn]) {
+        [self.navigationController performSegueWithIdentifier:@"loggedin" sender:self];
     }
 }
 
 - (IBAction)loginButtonPressed:(id)sender {
-    [keychainItem setObject:[password text] forKey:(__bridge id)(kSecValueData)];
-    [keychainItem setObject:[username text] forKey:(__bridge id)(kSecAttrAccount)];
-    
     // Perform login
-    
-    NSURL *url = [NSURL URLWithString:@"https://www.mycokerewards.com/xmlrpc"];
-    XMLRPCRequest *request = [[XMLRPCRequest alloc] initWithURL:url];
-    XMLRPCConnectionManager *manager = [XMLRPCConnectionManager sharedManager];
-
-    NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:[username text], @"emailAddress", [password text], @"password", @"4.1", @"VERSION", nil];
-    [request setMethod:@"points.pointsBalance" withParameter:params];
-    
-    NSLog(@"Request: %@", [request body]);
-    
-    [manager spawnConnectionWithXMLRPCRequest:request delegate:self];
+    [self.cokeRewards getPoints:[username text] withPassword:[password text]];
 }
 
-- (void)request:(XMLRPCRequest *)request didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-    NSLog(@"didReceiveAuthenticationChallenge");
+- (void)userDidLogout {
+    // TODO: show a message saying error message
 }
 
-- (void)request:(XMLRPCRequest *)request didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-    NSLog(@"didCancelWithAuthenticationChallenge");
-}
-
-- (void)request:(XMLRPCRequest *)request didFailWithError:(NSError *)error {
-    NSLog(@"didFailWithError: %@", [error localizedDescription]);
-}
-
-- (void)request:(XMLRPCRequest *)request didReceiveResponse:(XMLRPCResponse *)response {
-    NSLog(@"didReceiveResponse: %@", [response body]);
-}
-
-- (BOOL)request:(XMLRPCRequest *)request canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace {
-    NSLog(@"canAuthenticateAgainstProtectionSpace");
-    return NO;
+- (void)pointCountDidUpdate:(int)points {
+    [self.navigationController performSegueWithIdentifier:@"loggedin" sender:self];
 }
 
 @end

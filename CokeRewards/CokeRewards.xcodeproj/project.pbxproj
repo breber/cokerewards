@@ -25,6 +25,7 @@
 		D1C2AFBD160BA10F005E719C /* libXMLRPC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D1C2AFBC160BA10F005E719C /* libXMLRPC.a */; };
 		D1C2AFC2160BA135005E719C /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = D1C2AFBF160BA135005E719C /* NSData+Base64.m */; };
 		D1C2AFC3160BA135005E719C /* NSStringAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = D1C2AFC1160BA135005E719C /* NSStringAdditions.m */; };
+		D1C2AFC6160BB12D005E719C /* CokeRewardsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D1C2AFC5160BB12D005E719C /* CokeRewardsViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -68,6 +69,8 @@
 		D1C2AFBF160BA135005E719C /* NSData+Base64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSData+Base64.m"; path = "CokeRewards/Additions/NSData+Base64.m"; sourceTree = "<group>"; };
 		D1C2AFC0160BA135005E719C /* NSStringAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSStringAdditions.h; path = CokeRewards/Additions/NSStringAdditions.h; sourceTree = "<group>"; };
 		D1C2AFC1160BA135005E719C /* NSStringAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSStringAdditions.m; path = CokeRewards/Additions/NSStringAdditions.m; sourceTree = "<group>"; };
+		D1C2AFC4160BB12D005E719C /* CokeRewardsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CokeRewardsViewController.h; sourceTree = "<group>"; };
+		D1C2AFC5160BB12D005E719C /* CokeRewardsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CokeRewardsViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,6 +130,8 @@
 				D1289341160B69B600E646FB /* KeychainItemWrapper.m */,
 				D1289330160B687A00E646FB /* MainStoryboard_iPhone.storyboard */,
 				D1289333160B687A00E646FB /* MainStoryboard_iPad.storyboard */,
+				D1C2AFC4160BB12D005E719C /* CokeRewardsViewController.h */,
+				D1C2AFC5160BB12D005E719C /* CokeRewardsViewController.m */,
 				D1289336160B687A00E646FB /* LoginViewController.h */,
 				D1289337160B687A00E646FB /* LoginViewController.m */,
 				D128931F160B687A00E646FB /* Supporting Files */,
@@ -263,6 +268,7 @@
 				D1C2AFAC160BA0DC005E719C /* CokeRewardsRequest.m in Sources */,
 				D1C2AFC2160BA135005E719C /* NSData+Base64.m in Sources */,
 				D1C2AFC3160BA135005E719C /* NSStringAdditions.m in Sources */,
+				D1C2AFC6160BB12D005E719C /* CokeRewardsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -14,11 +14,11 @@
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="tLP-af-s5p">
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="73" id="Gpc-cK-5lP"/>
+                                    <constraint firstAttribute="width" constant="121" id="Tmn-ej-tuI"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                <fontDescription key="fontDescription" type="boldSystem" size="button"/>
                                 <state key="normal" title="Login">
-                                    <color key="titleColor" red="0.19607843459999999" green="0.30980393290000002" blue="0.52156865600000002" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="titleColor" red="0.19607843137254902" green="0.30980392156862746" blue="0.52156862745098043" alpha="1" colorSpace="calibratedRGB"/>
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <state key="highlighted">
@@ -32,7 +32,7 @@
                                 <constraints>
                                     <constraint firstAttribute="height" constant="56" id="8Au-Aq-UVq"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="27"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="27"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
@@ -51,15 +51,15 @@
                                 </connections>
                             </textField>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" red="1" green="0.40000000596046448" blue="0.40000000596046448" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
+                            <constraint firstItem="tLP-af-s5p" firstAttribute="centerX" secondItem="rUI-qw-K5C" secondAttribute="centerX" type="default" id="1bi-sE-yI2"/>
                             <constraint firstAttribute="trailing" secondItem="dBk-1U-tNd" secondAttribute="trailing" constant="20" symbolic="YES" type="default" id="2Gh-tb-c68"/>
-                            <constraint firstItem="tLP-af-s5p" firstAttribute="top" secondItem="3" secondAttribute="top" constant="193" id="5ag-Ee-eQG"/>
                             <constraint firstItem="hJS-vA-dLJ" firstAttribute="top" secondItem="3" secondAttribute="top" constant="20" symbolic="YES" type="default" id="DyT-CQ-Dcg"/>
                             <constraint firstItem="dBk-1U-tNd" firstAttribute="top" secondItem="3" secondAttribute="top" constant="108" id="N6y-8r-cyf"/>
                             <constraint firstAttribute="trailing" secondItem="hJS-vA-dLJ" secondAttribute="trailing" constant="20" symbolic="YES" type="default" id="Oyx-JV-0aY"/>
-                            <constraint firstItem="tLP-af-s5p" firstAttribute="centerX" secondItem="rUI-qw-K5C" secondAttribute="centerX" type="default" id="RJR-M1-kI3"/>
                             <constraint firstItem="hJS-vA-dLJ" firstAttribute="leading" secondItem="3" secondAttribute="leading" constant="20" symbolic="YES" type="default" id="f6P-un-Mx1"/>
+                            <constraint firstItem="tLP-af-s5p" firstAttribute="top" secondItem="3" secondAttribute="top" constant="194" id="hYI-NM-UIJ"/>
                             <constraint firstAttribute="trailing" secondItem="rUI-qw-K5C" secondAttribute="trailing" constant="20" symbolic="YES" type="default" id="huO-sy-9W2"/>
                             <constraint firstItem="rUI-qw-K5C" firstAttribute="leading" secondItem="3" secondAttribute="leading" constant="20" symbolic="YES" type="default" id="qZ8-zC-pOY"/>
                             <constraint firstItem="rUI-qw-K5C" firstAttribute="top" secondItem="dBk-1U-tNd" secondAttribute="bottom" constant="8" symbolic="YES" type="default" id="tCK-By-xDb"/>
@@ -69,13 +69,53 @@
                     <connections>
                         <outlet property="password" destination="rUI-qw-K5C" id="bMP-IV-Y5i"/>
                         <outlet property="username" destination="dBk-1U-tNd" id="krq-0k-QoP"/>
+                        <segue destination="0Fe-eI-Hnr" kind="push" identifier="loggedin" id="iRW-Wq-M2W"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4" sceneMemberID="firstResponder"/>
             </objects>
         </scene>
+        <!--Coke Rewards View Controller-->
+        <scene sceneID="uua-R9-CcI">
+            <objects>
+                <viewController id="0Fe-eI-Hnr" customClass="CokeRewardsViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="tzH-Od-lDR">
+                        <rect key="frame" x="0.0" y="20" width="320" height="548"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="p8Y-Rx-iTG">
+                                <items>
+                                    <navigationItem title="Coke Rewards" id="FBb-Ot-W6L">
+                                        <barButtonItem key="rightBarButtonItem" title="Log Out" id="Cyp-Vo-h32">
+                                            <connections>
+                                                <action selector="logoutButtonPressed:" destination="0Fe-eI-Hnr" id="Jfk-a2-oVn"/>
+                                            </connections>
+                                        </barButtonItem>
+                                    </navigationItem>
+                                </items>
+                            </navigationBar>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="p8Y-Rx-iTG" firstAttribute="leading" secondItem="tzH-Od-lDR" secondAttribute="leading" type="default" id="Jaa-Ll-5Gx"/>
+                            <constraint firstItem="p8Y-Rx-iTG" firstAttribute="trailing" secondItem="tzH-Od-lDR" secondAttribute="trailing" type="default" id="Jw6-kW-raT"/>
+                            <constraint firstItem="p8Y-Rx-iTG" firstAttribute="top" secondItem="tzH-Od-lDR" secondAttribute="top" type="default" id="rZ7-lT-gRu"/>
+                        </constraints>
+                    </view>
+                    <navigationItem key="navigationItem" id="mnW-hy-zaa"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="EDW-Zv-66U" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="750" y="118"/>
+        </scene>
     </scenes>
     <classes>
+        <class className="CokeRewardsViewController" superclassName="UIViewController">
+            <source key="sourceIdentifier" type="project" relativePath="./Classes/CokeRewardsViewController.h"/>
+            <relationships>
+                <relationship kind="action" name="logoutButtonPressed:"/>
+            </relationships>
+        </class>
         <class className="LoginViewController" superclassName="UIViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/LoginViewController.h"/>
             <relationships>

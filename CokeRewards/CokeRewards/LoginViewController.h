@@ -7,9 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "XMLRPC.h"
+#import "CokeRewardsRequest.h"
 
-@interface LoginViewController : UIViewController <XMLRPCConnectionDelegate> {
+@interface LoginViewController : UIViewController <CokeRewardsDelegate> {
     IBOutlet UITextField *username;
     IBOutlet UITextField *password;
 }
