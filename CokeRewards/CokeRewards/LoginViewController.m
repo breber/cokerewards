@@ -38,7 +38,7 @@
     // TODO: show a message saying error message
 }
 
-- (void)pointCountDidUpdate:(int)points {
+- (void)dataDidUpdate {
     [self.navigationController performSegueWithIdentifier:@"loggedin" sender:self];
 }
 

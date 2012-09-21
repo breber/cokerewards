@@ -12,7 +12,7 @@
 @protocol CokeRewardsDelegate <NSObject>
 
 - (void)userDidLogout;
-- (void)pointCountDidUpdate:(int)points;
+- (void)dataDidUpdate;
 
 @end
 
@@ -23,7 +23,7 @@
 #define POINTS_EARNED_RESULT @"pointsEarnedResult"
 #define MESSAGES_RESULT @"messagesResult"
 
-@interface CokeRewardsRequest : NSObject <XMLRPCConnectionDelegate, NSXMLParserDelegate>
+@interface CokeRewardsRequest : NSObject <XMLRPCConnectionDelegate>
 
 @property(nonatomic) id <CokeRewardsDelegate> delegate;
 

@@ -111,18 +111,11 @@ static CokeRewardsRequest *instance = nil;
 
 - (void)request:(XMLRPCRequest *)request didReceiveResponse:(XMLRPCResponse *)response {
     NSLog(@"didReceiveResponse: %@", [response body]);
-    
-    NSXMLParser *parser = [[NSXMLParser alloc] initWithData:[[response body] dataUsingEncoding:NSASCIIStringEncoding]];
-    parser.delegate = self;
-    [parser parse];
 }
 
 - (BOOL)request:(XMLRPCRequest *)request canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace {
     NSLog(@"canAuthenticateAgainstProtectionSpace");
     return NO;
 }
-
-// NSXMLParserDelegate
-
 
 @end

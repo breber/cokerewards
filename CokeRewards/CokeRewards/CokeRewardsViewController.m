@@ -37,7 +37,7 @@
     [self.navigationController popToRootViewControllerAnimated:YES];
 }
 
-- (void)pointCountDidUpdate:(int)points {
+- (void)dataDidUpdate {
     // TODO: update ui
     NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
     
