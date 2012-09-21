@@ -94,19 +94,76 @@
                                     </navigationItem>
                                 </items>
                             </navigationBar>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Code" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="of5-fB-CEM">
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="allCharacters" autocorrectionType="no" keyboardType="namePhonePad" returnKeyType="send"/>
+                            </textField>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="oQ9-lG-2pq">
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                <state key="normal" title="Submit Code">
+                                    <color key="titleColor" red="0.19607843459999999" green="0.30980393290000002" blue="0.52156865600000002" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <state key="highlighted">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                            </button>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Welcome!" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HPb-oW-yHD">
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="Pqv-0k-qpz"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="23"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Number of Points:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Rvi-QF-Fxp">
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="153" id="YNV-GC-kfM"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tGJ-Pb-Gtw">
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="42" id="lsf-vh-Fpf"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
+                            <constraint firstAttribute="trailing" secondItem="HPb-oW-yHD" secondAttribute="trailing" constant="20" symbolic="YES" type="default" id="2UV-c3-3rf"/>
+                            <constraint firstItem="p8Y-Rx-iTG" firstAttribute="trailing" secondItem="tzH-Od-lDR" secondAttribute="trailing" type="default" id="6YJ-Mg-8t7"/>
+                            <constraint firstItem="oQ9-lG-2pq" firstAttribute="baseline" secondItem="of5-fB-CEM" secondAttribute="baseline" type="default" id="7Nv-Xk-zja"/>
+                            <constraint firstItem="HPb-oW-yHD" firstAttribute="top" secondItem="tzH-Od-lDR" secondAttribute="top" constant="77" id="7VS-cn-fRK"/>
+                            <constraint firstItem="tGJ-Pb-Gtw" firstAttribute="leading" secondItem="Rvi-QF-Fxp" secondAttribute="trailing" constant="8" symbolic="YES" type="default" id="9se-hy-oAz"/>
+                            <constraint firstAttribute="trailing" secondItem="of5-fB-CEM" secondAttribute="trailing" constant="20" symbolic="YES" type="default" id="Eue-lm-m1u"/>
+                            <constraint firstItem="tGJ-Pb-Gtw" firstAttribute="baseline" secondItem="Rvi-QF-Fxp" secondAttribute="baseline" type="default" id="Hca-2f-Thu"/>
+                            <constraint firstItem="of5-fB-CEM" firstAttribute="centerX" secondItem="oQ9-lG-2pq" secondAttribute="centerX" type="default" id="JYA-qY-GHV"/>
                             <constraint firstItem="p8Y-Rx-iTG" firstAttribute="leading" secondItem="tzH-Od-lDR" secondAttribute="leading" type="default" id="Jaa-Ll-5Gx"/>
-                            <constraint firstItem="p8Y-Rx-iTG" firstAttribute="trailing" secondItem="tzH-Od-lDR" secondAttribute="trailing" type="default" id="Jw6-kW-raT"/>
+                            <constraint firstItem="of5-fB-CEM" firstAttribute="leading" secondItem="tzH-Od-lDR" secondAttribute="leading" constant="20" symbolic="YES" type="default" id="Spq-Y4-rUu"/>
+                            <constraint firstItem="Rvi-QF-Fxp" firstAttribute="leading" secondItem="tzH-Od-lDR" secondAttribute="leading" constant="20" symbolic="YES" type="default" id="ZJy-q5-TjA"/>
+                            <constraint firstItem="oQ9-lG-2pq" firstAttribute="top" secondItem="of5-fB-CEM" secondAttribute="bottom" constant="8" symbolic="YES" type="default" id="gCV-9a-mja"/>
                             <constraint firstItem="p8Y-Rx-iTG" firstAttribute="top" secondItem="tzH-Od-lDR" secondAttribute="top" type="default" id="rZ7-lT-gRu"/>
+                            <constraint firstItem="tGJ-Pb-Gtw" firstAttribute="top" secondItem="HPb-oW-yHD" secondAttribute="bottom" constant="8" symbolic="YES" type="default" id="s1R-od-6n5"/>
+                            <constraint firstItem="Rvi-QF-Fxp" firstAttribute="top" secondItem="HPb-oW-yHD" secondAttribute="bottom" constant="8" symbolic="YES" type="default" id="tQT-Mf-5PA"/>
+                            <constraint firstItem="HPb-oW-yHD" firstAttribute="leading" secondItem="tzH-Od-lDR" secondAttribute="leading" constant="20" symbolic="YES" type="default" id="yq9-i1-Z0P"/>
+                            <constraint firstItem="of5-fB-CEM" firstAttribute="top" secondItem="tzH-Od-lDR" secondAttribute="top" constant="156" id="zxI-bM-9bj"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="mnW-hy-zaa"/>
+                    <connections>
+                        <outlet property="codeTextField" destination="of5-fB-CEM" id="g8O-bA-PkV"/>
+                        <outlet property="pointCountLabel" destination="tGJ-Pb-Gtw" id="2Wy-Hk-Ufc"/>
+                        <outlet property="welcomeLabel" destination="HPb-oW-yHD" id="gCL-JV-nzJ"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="EDW-Zv-66U" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="750" y="118"/>
+            <point key="canvasLocation" x="750" y="111"/>
         </scene>
     </scenes>
     <classes>
@@ -114,6 +171,10 @@
             <source key="sourceIdentifier" type="project" relativePath="./Classes/CokeRewardsViewController.h"/>
             <relationships>
                 <relationship kind="action" name="logoutButtonPressed:"/>
+                <relationship kind="action" name="submitCode:"/>
+                <relationship kind="outlet" name="codeTextField" candidateClass="UITextField"/>
+                <relationship kind="outlet" name="pointCountLabel" candidateClass="UILabel"/>
+                <relationship kind="outlet" name="welcomeLabel" candidateClass="UILabel"/>
             </relationships>
         </class>
         <class className="LoginViewController" superclassName="UIViewController">

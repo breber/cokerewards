@@ -16,18 +16,23 @@
 
 @end
 
+#define POINTS @"points"
+#define LOGGED_IN @"loggedIn"
+#define SCREEN_NAME @"screenName"
+#define ENTER_CODE_RESULT @"enterCodeResult"
+#define POINTS_EARNED_RESULT @"pointsEarnedResult"
+#define MESSAGES_RESULT @"messagesResult"
+
 @interface CokeRewardsRequest : NSObject <XMLRPCConnectionDelegate, NSXMLParserDelegate>
 
 @property(nonatomic) id <CokeRewardsDelegate> delegate;
 
 + (CokeRewardsRequest *)sharedInstance;
-- (BOOL)isLoggedIn;
-
 - (void)getPoints;
-- (void)getPoints:(NSString *)name withPassword:(NSString *)password;
-
 - (void)sendCode:(NSString *)code;
 
+- (BOOL)isLoggedIn;
+- (void)login:(NSString *)name withPassword:(NSString *)password;
 - (void)logout;
 
 @end

@@ -31,7 +31,7 @@
 
 - (IBAction)loginButtonPressed:(id)sender {
     // Perform login
-    [self.cokeRewards getPoints:[username text] withPassword:[password text]];
+    [self.cokeRewards login:[username text] withPassword:[password text]];
 }
 
 - (void)userDidLogout {

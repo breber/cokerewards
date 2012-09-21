@@ -12,6 +12,7 @@
 
 @interface CokeRewardsRequest() {
     KeychainItemWrapper *keychainItem;
+    NSUserDefaults *preferences;
 }
 
 @end
@@ -25,6 +26,7 @@ static CokeRewardsRequest *instance = nil;
     self = [super init];
     if (self) {
         keychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:@"CokeRewards" accessGroup:nil];
+        preferences = [NSUserDefaults standardUserDefaults];
     }
     return self;
 }
@@ -37,6 +39,15 @@ static CokeRewardsRequest *instance = nil;
     return instance;
 }
 
+- (void)initPreferences {
+    [preferences setInteger:0 forKey:POINTS];
+    [preferences setBool:NO forKey:LOGGED_IN];
+    [preferences setObject:@"" forKey:SCREEN_NAME];
+    [preferences setBool:NO forKey:ENTER_CODE_RESULT];
+    [preferences setInteger:0 forKey:POINTS_EARNED_RESULT];
+    [preferences setObject:@"" forKey:MESSAGES_RESULT];
+}
+
 - (BOOL)isLoggedIn {
     NSString *passwordText = [keychainItem objectForKey:(__bridge id)(kSecValueData)];
     NSString *usernameText = [keychainItem objectForKey:(__bridge id)(kSecAttrAccount)];
@@ -44,9 +55,11 @@ static CokeRewardsRequest *instance = nil;
     return ![@"" isEqualToString:usernameText] && ![@"" isEqualToString:passwordText];
 }
 
-- (void)getPoints:(NSString *)name withPassword:(NSString *)password {
+- (void)login:(NSString *)name withPassword:(NSString *)password {
     [keychainItem setObject:password forKey:(__bridge id)(kSecValueData)];
     [keychainItem setObject:name forKey:(__bridge id)(kSecAttrAccount)];
+    
+    [self initPreferences];
     
     [self getPoints];
 }
@@ -58,10 +71,9 @@ static CokeRewardsRequest *instance = nil;
     
     NSString *username = [keychainItem objectForKey:(__bridge id)(kSecAttrAccount)];
     NSString *password = [keychainItem objectForKey:(__bridge id)(kSecValueData)];
+    NSString *screenName = [preferences objectForKey:SCREEN_NAME];
     
-    // TODO: send screenName
-    
-    NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:username, @"emailAddress", password, @"password", @"4.1", @"VERSION", nil];
+    NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:username, @"emailAddress", password, @"password", @"4.1", @"VERSION", screenName, @"screenName", nil];
     [request setMethod:@"points.pointsBalance" withParameter:params];
     [manager spawnConnectionWithXMLRPCRequest:request delegate:self];
 }
@@ -73,16 +85,16 @@ static CokeRewardsRequest *instance = nil;
     
     NSString *username = [keychainItem objectForKey:(__bridge id)(kSecAttrAccount)];
     NSString *password = [keychainItem objectForKey:(__bridge id)(kSecValueData)];
-    
-    // TODO: send screenName
-    
-    NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:username, @"emailAddress", password, @"password", @"4.1", @"VERSION", code, @"capCode", nil];
+    NSString *screenName = [preferences objectForKey:SCREEN_NAME];
+        
+    NSDictionary *params = [NSDictionary dictionaryWithObjectsAndKeys:username, @"emailAddress", password, @"password", @"4.1", @"VERSION", code, @"capCode", screenName, @"screenName", nil];
     [request setMethod:@"points.enterCode" withParameter:params];
     [manager spawnConnectionWithXMLRPCRequest:request delegate:self];
 }
 
 - (void)logout {
     [keychainItem resetKeychainItem];
+    [self initPreferences];
 }
 
 - (void)request:(XMLRPCRequest *)request didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {

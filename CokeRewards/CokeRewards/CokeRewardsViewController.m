@@ -24,6 +24,10 @@
     self.cokeRewards.delegate = self;
 }
 
+- (IBAction)submitCode:(id)sender {
+    // TODO: submit code
+}
+
 - (IBAction)logoutButtonPressed:(id)sender {
     [self userDidLogout];
 }
@@ -35,6 +39,20 @@
 
 - (void)pointCountDidUpdate:(int)points {
     // TODO: update ui
+    NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+    
+    NSString *name = [prefs objectForKey:SCREEN_NAME];
+    if (![@"" isEqualToString:name]) {
+        [welcomeLabel setText:[NSString stringWithFormat:@"Welcome %@!", name]];
+    } else {
+        // TODO: get from keystore
+        [welcomeLabel setText:[NSString stringWithFormat:@"Welcome %@!", @"Anonymous"]];
+    }
+    
+    NSInteger pointCount = [prefs integerForKey:POINTS];
+    [pointCountLabel setText:[NSString stringWithFormat:@"%d", pointCount]];
+    
+    
 }
 
 @end
