@@ -15,7 +15,6 @@ import android.content.SharedPreferences.Editor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -31,7 +30,7 @@ import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 /**
  * Main activity for the app
- * 
+ *
  * @author breber
  */
 public class CokeRewardsActivity extends Activity {
@@ -80,7 +79,7 @@ public class CokeRewardsActivity extends Activity {
 	 * A Runnable that will update the UI with values stored
 	 * in SharedPreferences
 	 */
-	private Runnable updateUIRunnable = new Runnable() {
+	private final Runnable updateUIRunnable = new Runnable() {
 		@Override
 		public void run() {
 			SharedPreferences prefs = getSharedPreferences(Constants.PREFS_COKE_REWARDS, 0);
@@ -104,7 +103,7 @@ public class CokeRewardsActivity extends Activity {
 	 * A Runnable that will update the UI with values stored
 	 * in SharedPreferences
 	 */
-	private Runnable codeUpdateRunnable = new Runnable() {
+	private final Runnable codeUpdateRunnable = new Runnable() {
 		@Override
 		public void run() {
 			SharedPreferences prefs = getSharedPreferences(Constants.PREFS_COKE_REWARDS, 0);
@@ -139,7 +138,7 @@ public class CokeRewardsActivity extends Activity {
 	/**
 	 * A Runnable that will show an error Toast
 	 */
-	private Runnable errorRunnable = new Runnable() {
+	private final Runnable errorRunnable = new Runnable() {
 		@Override
 		public void run() {
 			if (dlg != null && dlg.isShowing()) {
@@ -251,8 +250,12 @@ public class CokeRewardsActivity extends Activity {
 
 			@Override
 			public void onPurchaseStateChanged(String itemId, PurchaseState state) {
-				Log.i(TAG, "onPurchaseStateChanged() itemId: " + itemId + " --> " + state);
-				isRegistered = BillingController.isPurchased(CokeRewardsActivity.this, Constants.PRODUCT_ID);
+				try {
+					isRegistered = BillingController.isPurchased(CokeRewardsActivity.this, Constants.PRODUCT_ID);
+				} catch (Exception e) {
+					// Some sort of exception happened
+					isRegistered = false;
+				}
 
 				hideAds();
 			}
@@ -271,7 +274,13 @@ public class CokeRewardsActivity extends Activity {
 		BillingController.registerObserver(mBillingObserver);
 		BillingController.checkBillingSupported(this);
 
-		isRegistered = BillingController.isPurchased(CokeRewardsActivity.this, Constants.PRODUCT_ID);
+		try {
+			isRegistered = BillingController.isPurchased(CokeRewardsActivity.this, Constants.PRODUCT_ID);
+		} catch (Exception e) {
+			// Some sort of exception happened
+			isRegistered = false;
+		}
+
 		hideAds();
 	}
 
@@ -356,7 +365,7 @@ public class CokeRewardsActivity extends Activity {
 
 	/**
 	 * Do we have a logged in user?
-	 * 
+	 *
 	 * @return whether we have a valid email address, password, and have successfully
 	 * logged in with the most recent request
 	 */
@@ -366,7 +375,7 @@ public class CokeRewardsActivity extends Activity {
 
 	/**
 	 * Do we have a logged in user?
-	 * 
+	 *
 	 * @return whether we have a valid email address, password, and have successfully
 	 * logged in with the most recent request
 	 */
@@ -440,7 +449,7 @@ public class CokeRewardsActivity extends Activity {
 
 	/**
 	 * Make a server request and update preferences accordingly.
-	 * 
+	 *
 	 * @param ctx The application context
 	 * @param runnable The Runnable to start after we are done processing
 	 * @param data The data received from the server
